@@ -1,5 +1,6 @@
 from typing import Sequence
 from os import linesep
+import re
 
 
 def commandEndsIn(line: str) -> bool:
@@ -27,5 +28,50 @@ def splitInCommands(text: str) -> Sequence[str]:
         else:
             # merge multi line command in the cache
             cache += linesep
+
+    return result
+
+
+def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
+    """
+    Translate all the annotations of the Makefile-Output to executable commands
+    """
+
+    # makeOutput must start with directory information - the flag was given
+    if (not makeOutput or
+            not makeOutput[0].startswith("make: Entering directory ")):
+        raise Exception("Directory changes cannot be recognized")
+
+    # Manage the directories with a stack
+    dirstack = []
+    result = []
+
+    # some helpfull landmarks
+    cdtoken = " # from make"
+
+    for cmd in makeOutput:
+        if cmd.startswith("make"):
+            # If the command belongs to make itself
+
+            # Look for a directory action
+            match = re.search("^make(\[\d+\])?: (?P<action>Entering|Leaving) "
+                              "directory '(?P<dir>[^']*)'$", cmd)
+
+            if match:
+                # It's a directory action
+
+                if match.group('action') == 'Entering':
+                    dirstack.append(match.group('dir'))
+                    result.append("cd " + match.group('dir') + cdtoken)
+
+                elif match.group('action') == 'Leaving':
+                    lastdir = dirstack.pop()
+                    result.append("cd " + lastdir + cdtoken)
+
+            else:
+                raise(Exception("Unsupported make command: " + cmd))
+
+        else:
+            result.append(cmd)
 
     return result
