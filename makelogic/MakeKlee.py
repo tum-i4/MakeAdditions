@@ -1,3 +1,4 @@
+from .MultiLineTransformer import MultiLineTransformer
 from .Transformer import Transformer
 from .transform import *
 from os import linesep
@@ -20,6 +21,7 @@ class MakeKlee:
     """
 
     cmds = []
+    libs = set({})
     fails = 0
 
     def __init__(self):
@@ -30,8 +32,11 @@ class MakeKlee:
 
     def transformToLLVM(self, cmd: str) -> str:
         if any(c in cmd for c in ["&&", "|", ";", ">", "<"]):
-            self.fails += 1
-            return cmd + " # Sorry, no transformation found"
+            if MultiLineTransformer.canBeAppliedOn(cmd):
+                return MultiLineTransformer.applyTransformationOn(cmd, self)
+            else:
+                self.fails += 1
+                return cmd + " # Sorry, no transformation found"
 
         applicable = list(filter(
             lambda l: l.canBeAppliedOn(cmd),
