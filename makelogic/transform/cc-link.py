@@ -12,6 +12,9 @@ class TransformCCLink(Transformer):
         # tokenize and remove the original command
         tokens = cmd.split()[1:]
 
+        # remove optimizer flags
+        tokens = list(filter(lambda t: t not in ['-O1', '-O2', '-O3'], tokens))
+
         if "-o" in tokens:
             # append .bc to the output file
             pos = tokens.index("-o")

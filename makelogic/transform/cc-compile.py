@@ -11,6 +11,9 @@ class TransformCCCompile(Transformer):
         # tokenize and remove the original command
         tokens = cmd.split()[1:]
 
+        # remove optimizer flags
+        tokens = list(filter(lambda t: t not in ['-O1', '-O2', '-O3'], tokens))
+
         newcmd = CLANG + " -emit-llvm "
         if "-g" not in tokens:
             newcmd += "-g "
