@@ -7,7 +7,7 @@ from makelogic.MakeScript import MakeScript
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description='Convert a Makefile to a equivalent sh-script'
+        description='Convert a Makefile to a sh-script for building with llvm'
     )
 
     parser.add_argument(
