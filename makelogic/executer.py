@@ -17,6 +17,7 @@ def dryRunMakefile(makefile: str, target: str ="all") -> str:
     cwd = getcwd()
 
     # Create a new environment with English language
+    # Thereby the later parsing is deterministic
     english = dict(environ)
     english['LANG'] = 'en_US.UTF-8'
 

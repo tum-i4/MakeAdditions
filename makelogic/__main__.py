@@ -40,8 +40,11 @@ def main():
     m = MakeScript(args.makefile.name, args.target)
 
     if args.chain == "vanilla":
+        # No changes needed for vanilla
         print(m)
     elif args.chain == "klee":
+        # Transform commands for KLEE
+        # TODO find a better interface
         klee = MakeKlee()
         for c in m.cmds:
             klee.appendCommand(c)

@@ -69,6 +69,7 @@ def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
                     result.append("cd " + lastdir + cdtoken)
 
             else:
+                # Maybe not everything is supported (yet) ;(
                 raise(Exception("Unsupported make command: " + cmd))
 
         else:
