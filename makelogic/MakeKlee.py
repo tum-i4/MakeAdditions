@@ -1,6 +1,7 @@
 from .MultiLineTransformer import MultiLineTransformer
 from .Transformer import Transformer
 from .transform import *
+from .MakeScript import MakeScript
 from os import linesep
 from sys import stderr
 
@@ -13,24 +14,18 @@ def listAllTransformers():
     )
 
 
-class MakeKlee:
+class MakeKlee(MakeScript):
 
     """
     The .sh-script representation of the tasks from a Makefile converted to
     the logic of KLEE analysis, i.e. using llvm code
     """
 
-    cmds = []
-    libs = set({})
-    fails = 0
-
     def __init__(self):
-        pass
+        super(MakeKlee, self).__init__()
+        self.fails = 0
 
-    def appendCommand(self, cmd: str):
-        self.cmds.append(self.transformToLLVM(cmd))
-
-    def transformToLLVM(self, cmd: str) -> str:
+    def transform(self, cmd: str):
         if any(c in cmd for c in ["&&", "|", ";", ">", "<"]):
             if MultiLineTransformer.canBeAppliedOn(cmd):
                 return MultiLineTransformer.applyTransformationOn(cmd, self)
@@ -54,7 +49,7 @@ class MakeKlee:
             raise Exception("Multiple Transformers match")
 
     def __str__(self):
-        result = "#!/bin/sh" + (linesep * 2) + linesep.join(self.cmds)
+        result = super(MakeKlee, self).__str__()
 
         # Append a warning, if there were untransformed commands
         if self.fails > 0:

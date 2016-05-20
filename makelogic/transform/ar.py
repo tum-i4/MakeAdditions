@@ -18,9 +18,6 @@ class TransformAr(Transformer):
         # Add .bc file extension to static archive
         tokens[1] += ".bc"
 
-        # register library to be direct linkable in later commands
-        container.libs.add(tokens[1])
-
         # transform all linked .o-files to the corresponding .bc-file
         tokens = map(
             lambda x: x[:-2] + ".bc" if x.endswith(".o") else x, tokens)

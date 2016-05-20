@@ -36,20 +36,10 @@ def main():
 
     args = parser.parse_args()
 
-    # For all cases we need to parse the vanilla Makefile
-    m = MakeScript.from_makefile(args.makefile.name, args.target)
-
     if args.chain == "vanilla":
-        # No changes needed for vanilla
-        print(m)
+        print(MakeScript.from_makefile(args.makefile.name, args.target))
     elif args.chain == "klee":
-        # Transform commands for KLEE
-        # TODO find a better interface
-        klee = MakeKlee()
-        for c in m.cmds:
-            klee.appendCommand(c)
-
-        print(klee)
+        print(MakeKlee.from_makefile(args.makefile.name, args.target))
 
 if __name__ == "__main__":
     main()
