@@ -11,7 +11,8 @@ class MakeScript:
 
     cmds = []
 
-    def __init__(self, makefile: str, target: str = 'all'):
+    def __init__(self, makefile, target=None):
+        target = target or "all"
         self.cmds = translateMakeAnnotations(
             splitInCommands(dryRunMakefile(makefile, target)))
 

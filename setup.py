@@ -8,7 +8,7 @@ setup(
     packages=['makelogic'],
     entry_points={
         'console_scripts': [
-            'makeLogic = makelogic.__main__:main'
+            'makelogic = makelogic.__main__:main'
         ]
     },
 )
