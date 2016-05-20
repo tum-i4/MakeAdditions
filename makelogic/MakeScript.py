@@ -9,12 +9,26 @@ class MakeScript:
     The .sh-script representation of the tasks from a Makefile
     """
 
-    cmds = []
+    # Header for the output of the makescript
+    __HEADER = "#!/bin/sh" + (linesep * 2)
 
-    def __init__(self, makefile, target=None):
+    def __init__(self):
+        """ Just init an empty makefile """
+        self.cmds = []
+
+    @classmethod
+    def from_makefile(cls, makefile, target=None):
+        """ Alternative constructor from makefile on the filesystem """
         target = target or "all"
-        self.cmds = translateMakeAnnotations(
+
+        # Start with an empty Makescript
+        new = cls()
+
+        # And add the commands of a dry run
+        new.cmds = translateMakeAnnotations(
             splitInCommands(dryRunMakefile(makefile, target)))
 
+        return new
+
     def __str__(self):
-        return "#!/bin/sh" + (linesep * 2) + linesep.join(self.cmds)
+        return self.__HEADER + linesep.join(self.cmds)

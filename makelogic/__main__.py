@@ -37,7 +37,7 @@ def main():
     args = parser.parse_args()
 
     # For all cases we need to parse the vanilla Makefile
-    m = MakeScript(args.makefile.name, args.target)
+    m = MakeScript.from_makefile(args.makefile.name, args.target)
 
     if args.chain == "vanilla":
         # No changes needed for vanilla
