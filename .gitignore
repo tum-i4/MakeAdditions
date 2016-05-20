@@ -3,5 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual environment
+.venv
+
 # IDE project files
 .idea/
