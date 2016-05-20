@@ -1,6 +1,6 @@
 import unittest
 from textwrap import dedent
-from makelogic.parser import *
+from makelogic.parse import *
 
 
 class TestPaserSplitInCommands(unittest.TestCase):

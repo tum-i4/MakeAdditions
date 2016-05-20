@@ -1,5 +1,5 @@
-from .executer import dryRunMakefile
-from .parser import splitInCommands, translateMakeAnnotations
+from .execute import dryRunMakefile
+from .parse import splitInCommands, translateMakeAnnotations
 from os import linesep
 
 
