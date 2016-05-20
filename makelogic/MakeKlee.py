@@ -54,8 +54,13 @@ class MakeKlee:
             raise Exception("Multiple Transformers match")
 
     def __str__(self):
-        return (
-            "#!/bin/sh" + (linesep * 2) + linesep.join(self.cmds) +
-            linesep + "# {0} commands not transformed".format(self.fails) +
-            " ( {0:.2%} )".format(self.fails / len(self.cmds))
-        )
+        result = "#!/bin/sh" + (linesep * 2) + linesep.join(self.cmds)
+
+        # Append a warning, if there were untransformed commands
+        if self.fails > 0:
+            result += (
+                linesep +
+                "# Warning {0} commands were not transformed ({0:.2%})".format(
+                    self.fails, self.fails / len(self.cmds)))
+
+        return result
