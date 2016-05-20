@@ -2,6 +2,8 @@
 
 Use the logic of a Makefile
 
+## Requirements
+* Python >= 3.4
 
 ## For developers
 
