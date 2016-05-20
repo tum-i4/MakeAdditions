@@ -12,7 +12,11 @@ class TransformCCCompile(Transformer):
         tokens = cmd.split()[1:]
 
         # remove optimizer flags
-        tokens = list(filter(lambda t: t not in ['-O1', '-O2', '-O3'], tokens))
+        tokens = list(filter(lambda t: t not in [
+            '-O0', '-O1', '-O2', '-O3', '-Og', '-Os', '-Ofast'], tokens))
+
+        # deactivate optimization
+        tokens.insert(0, "-O0")
 
         newcmd = CLANG + " -emit-llvm "
         if "-g" not in tokens:

@@ -1,6 +1,5 @@
 import unittest
 from os import linesep
-from textwrap import dedent
 from makelogic.MakeKlee import MakeKlee
 from makelogic.config import CLANG, LLVMLINK
 
@@ -24,11 +23,11 @@ class TestPaserSplitInCommands(unittest.TestCase):
 
     def test_cc_compile(self):
         self.assertEqual(
-            CLANG + " -emit-llvm -g -c -o main.bc main.c",
+            CLANG + " -emit-llvm -g -O0 -c -o main.bc main.c",
             self.klee.transformToLLVM("cc    -c -o main.bc main.c")
         )
         self.assertEqual(
-            CLANG + " -emit-llvm -Wall -Winline -g "
+            CLANG + " -emit-llvm -O0 -Wall -Winline -g "
                     "-D_FILE_OFFSET_BITS=64 -c blocksort.c",
             self.klee.transformToLLVM(
                 "gcc -Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 "
