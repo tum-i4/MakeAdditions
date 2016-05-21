@@ -1,10 +1,9 @@
 import unittest
-from os import linesep
 from makelogic.MakeKlee import MakeKlee
 from makelogic.config import CLANG, LLVMLINK
 
 
-class TestPaserSplitInCommands(unittest.TestCase):
+class TestTransformSingle(unittest.TestCase):
 
     def setUp(self):
         self.klee = MakeKlee()
@@ -65,11 +64,3 @@ class TestPaserSplitInCommands(unittest.TestCase):
             LLVMLINK + " -o libbz2.a.bc blocksort.bc huffman.bc",
             self.klee.transform("ar cq libbz2.a blocksort.o huffman.o")
         )
-
-    def test_twoLinesTwoCommands(self):
-        self.assertEqual(linesep * 4, self.klee.transform(
-            "if ( test -f ranlib -o -f /usr/bin/ranlib -o \\\n"
-            "\t-f /bin/ranlib -o -f /usr/ccs/bin/ranlib ) ; then \\\n"
-            "\techo ranlib libbz2.a ; \\\n"
-            "\tranlib libbz2.a ; \\\n"
-            "fi"))
