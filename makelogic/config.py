@@ -1,8 +1,10 @@
 """
-Definition for a global config
+Load global configurations, if they exist in a config.ini file
 """
 
-# TODO find a better way for config
+import configparser
+CONFIG = configparser.ConfigParser()
+CONFIG.read('config.ini')
 
-CLANG = "~/build/llvm/Release/bin/clang"
-LLVMLINK = "~/build/llvm/Release/bin/llvm-link"
+CLANG = CONFIG.get("toolchain", "clang", fallback="clang")
+LLVMLINK = CONFIG.get("toolchain", "llvmlink", fallback="llvm-link")
