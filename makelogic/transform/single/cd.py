@@ -1,7 +1,7 @@
-from ..Transformer import Transformer
+from ..Transformer import TransformerSingle
 
 
-class TransformCd(Transformer):
+class TransformCd(TransformerSingle):
 
     def canBeAppliedOn(cmd: str) -> bool:
         return cmd.startswith("cd ")

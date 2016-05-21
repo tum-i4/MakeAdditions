@@ -1,13 +1,11 @@
+from ..Transformer import TransformerMulti
 from os import linesep
 
 
-class MultiLineTransformer(object):
+class TransformRanlib(TransformerMulti):
 
-    """
-    Dirty hack for parsing multi-line commands
-    TODO: gather more input for proper test-cases
-    """
-
+    # dirty hack for parsing this commands
+    # TODO gather more test data and find a real implementation
     toremove = [
         "if ( test -f ranlib -o -f /usr/bin/ranlib -o \\\n"
         "\t-f /bin/ranlib -o -f /usr/ccs/bin/ranlib ) ; then \\\n"
@@ -16,10 +14,8 @@ class MultiLineTransformer(object):
         "fi",
     ]
 
-    @staticmethod
     def canBeAppliedOn(cmd: str) -> bool:
-        return cmd in MultiLineTransformer.toremove
+        return cmd in TransformRanlib.toremove
 
-    @staticmethod
     def applyTransformationOn(cmd: str, container) -> str:
         return (len(cmd.splitlines()) - 1) * linesep

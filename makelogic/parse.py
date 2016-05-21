@@ -32,6 +32,11 @@ def splitInCommands(text: str) -> Sequence[str]:
     return result
 
 
+def is_multicommand(cmd: str) -> bool:
+    """ Checks, if a command combines multiple instructions """
+    return any(c in cmd for c in ["&&", "|", ";", ">", "<"])
+
+
 def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
     """
     Translate all the annotations of the Makefile-Output to executable commands

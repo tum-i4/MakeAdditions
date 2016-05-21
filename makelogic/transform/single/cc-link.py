@@ -1,8 +1,8 @@
-from ..Transformer import Transformer
-from ..config import LLVMLINK
+from ..Transformer import TransformerSingle
+from ...config import LLVMLINK
 
 
-class TransformCCLink(Transformer):
+class TransformCCLink(TransformerSingle):
 
     def canBeAppliedOn(cmd: str) -> bool:
         return (any(cmd.startswith(s) for s in ["cc", "gcc"]) and
@@ -24,6 +24,8 @@ class TransformCCLink(Transformer):
         if "-L." in tokens:
             # The local library path is no longer needed
             tokens.remove("-L.")
+
+            # replace -l flags, if the library was llvm-compiled earlier
             tokens[:] = [
                 "lib" + t[2:] + ".a.bc"
                 if (t.startswith("-l") and

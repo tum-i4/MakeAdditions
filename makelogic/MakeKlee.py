@@ -1,17 +1,8 @@
-from .MultiLineTransformer import MultiLineTransformer
-from .Transformer import Transformer
-from .transform import *
+from .transform import directory
 from .MakeScript import MakeScript
+from .parse import is_multicommand
 from os import linesep
 from sys import stderr
-
-
-def listAllTransformers():
-    # sorted for determinism
-    return sorted(
-        [cls for cls in Transformer.__subclasses__()],
-        key=lambda c: c.__name__
-    )
 
 
 class MakeKlee(MakeScript):
@@ -21,29 +12,34 @@ class MakeKlee(MakeScript):
     the logic of KLEE analysis, i.e. using llvm code
     """
 
+    __NOTRANSFORMATIONCOMMENT = " # Sorry, no transformation found"
+
     def __init__(self):
         super(MakeKlee, self).__init__()
+
+        # Counter for failed transformations
         self.fails = 0
 
     def transform(self, cmd: str):
-        if any(c in cmd for c in ["&&", "|", ";", ">", "<"]):
-            if MultiLineTransformer.canBeAppliedOn(cmd):
-                return MultiLineTransformer.applyTransformationOn(cmd, self)
-            else:
-                self.fails += 1
-                return cmd + " # Sorry, no transformation found"
+        # get all relevant transformations
+        if is_multicommand(cmd):
+            relevant = directory.list_all_multi_transformers()
+        else:
+            relevant = directory.list_all_single_transformers()
 
-        applicable = list(filter(
-            lambda l: l.canBeAppliedOn(cmd),
-            listAllTransformers()
-        ))
+        # filter for applicable transformations
+        applicable = list(filter(lambda l: l.canBeAppliedOn(cmd), relevant))
 
         if not applicable:
+            # if no transformation is applicable, mark this error
             self.fails += 1
-            return cmd + " # Sorry, no transformation found"
+            return cmd + self.__NOTRANSFORMATIONCOMMENT
         elif len(applicable) == 1:
+            # if exact one transformation is applicable, apply it
             return applicable[0].applyTransformationOn(cmd, self)
         else:
+            # if more than one transformation is applicable, the result is
+            # ambiguous, so just report this error with some details
             print(applicable, file=stderr)
             print(cmd, file=stderr)
             raise Exception("Multiple Transformers match")

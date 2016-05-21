@@ -1,7 +1,7 @@
-from ..Transformer import Transformer
+from ..Transformer import TransformerSingle
 
 
-class TransformEmpty(Transformer):
+class TransformEmpty(TransformerSingle):
 
     def canBeAppliedOn(cmd: str) -> bool:
         return not cmd.strip()

@@ -79,4 +79,5 @@ class MakeScript:
         # register the information of the commands
         map(self.register, cmds)
 
+        # and store all the transformed commands
         self.cmds.extend(list(map(self.transform, cmds)))

@@ -1,9 +1,9 @@
-from ..Transformer import Transformer
-from ..config import LLVMLINK
+from ..Transformer import TransformerSingle
+from ...config import LLVMLINK
 import re
 
 
-class TransformAr(Transformer):
+class TransformAr(TransformerSingle):
 
     def canBeAppliedOn(cmd: str) -> bool:
         return cmd.startswith("ar cq ") and re.search("ar cq \w+.a", cmd)

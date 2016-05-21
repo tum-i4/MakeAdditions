@@ -1,8 +1,8 @@
-from ..Transformer import Transformer
-from ..config import CLANG
+from ..Transformer import TransformerSingle
+from ...config import CLANG
 
 
-class TransformCCCompile(Transformer):
+class TransformCCCompile(TransformerSingle):
 
     def canBeAppliedOn(cmd: str) -> bool:
         return any(cmd.startswith(s) for s in ["cc", "gcc"]) and " -c " in cmd
@@ -18,10 +18,14 @@ class TransformCCCompile(Transformer):
         # deactivate optimization
         tokens.insert(0, "-O0")
 
+        # build the new command
         newcmd = CLANG + " -emit-llvm "
+
+        # add -g flag, if it was not there before
         if "-g" not in tokens:
             newcmd += "-g "
 
+        # rename the output-file from .o to .bc, if specified
         if "-o" in tokens:
             pos = tokens.index("-o")
             if tokens[pos + 1].endswith(".o"):
