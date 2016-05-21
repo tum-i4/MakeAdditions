@@ -8,11 +8,24 @@ if sys.version_info[0] == 3 and sys.version_info[1] < 4:
 
 setup(
     name='MakeLogic',
-    version='0.0.1',
+    version='0.1-alpha',
     packages=['makelogic'],
+    url="https://github.com/tum-i22/",
+    author="Thomas Hutzelmann",
+    author_email="t.hutzelmann@tum.de",
+    license="Apache Software License",
     entry_points={
         'console_scripts': [
             'makelogic = makelogic.__main__:main'
         ]
     },
+    classifiers=[
+        'License :: OSI Approved :: Apache Software License',
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Build Tools',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+    ]
 )
