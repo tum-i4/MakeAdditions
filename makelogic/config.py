@@ -1,3 +1,7 @@
+"""
+Definition for a global config
+"""
+
 # TODO find a better way for config
 
 CLANG = "~/build/llvm/Release/bin/clang"

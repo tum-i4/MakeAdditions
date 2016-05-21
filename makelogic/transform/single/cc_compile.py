@@ -1,19 +1,26 @@
+"""
+C compiler
+"""
+
 from ..Transformer import TransformerSingle
 from ...config import CLANG
+from ...constants import OPTIMIZERFLAGS
 
 
 class TransformCCCompile(TransformerSingle):
+    """ transform compile commands """
 
-    def canBeAppliedOn(cmd: str) -> bool:
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
         return any(cmd.startswith(s) for s in ["cc", "gcc"]) and " -c " in cmd
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         # tokenize and remove the original command
         tokens = cmd.split()[1:]
 
         # remove optimizer flags
-        tokens = list(filter(lambda t: t not in [
-            '-O0', '-O1', '-O2', '-O3', '-Og', '-Os', '-Ofast'], tokens))
+        tokens = [t for t in tokens if t not in OPTIMIZERFLAGS]
 
         # deactivate optimization
         tokens.insert(0, "-O0")

@@ -1,8 +1,14 @@
+"""
+This class represents and stores the tasks and commands from a
+Makefile (and a specific target), that are transform for a LLVM build.
+It can be printed as an .sh-script.
+"""
+
+from os import linesep
+from sys import stderr
 from .transform import directory
 from .MakeScript import MakeScript
 from .parse import is_multicommand
-from os import linesep
-from sys import stderr
 
 
 class MakeKlee(MakeScript):
@@ -28,7 +34,8 @@ class MakeKlee(MakeScript):
             relevant = directory.list_all_single_transformers()
 
         # filter for applicable transformations
-        applicable = list(filter(lambda l: l.canBeAppliedOn(cmd), relevant))
+        applicable = [transformer for transformer in relevant
+                      if transformer.can_be_applied_on(cmd)]
 
         if not applicable:
             # if no transformation is applicable, mark this error
@@ -36,7 +43,7 @@ class MakeKlee(MakeScript):
             return cmd + self.__NOTRANSFORMATIONCOMMENT
         elif len(applicable) == 1:
             # if exact one transformation is applicable, apply it
-            return applicable[0].applyTransformationOn(cmd, self)
+            return applicable[0].apply_transformation_on(cmd, self)
         else:
             # if more than one transformation is applicable, the result is
             # ambiguous, so just report this error with some details
@@ -51,7 +58,7 @@ class MakeKlee(MakeScript):
         if self.fails > 0:
             result += (
                 linesep +
-                "# Warning {0} commands were not transformed ({0:.2%})".format(
+                "# Warning {0} commands were not transformed ({1:.2%})".format(
                     self.fails, self.fails / len(self.cmds)))
 
         return result

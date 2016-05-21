@@ -1,10 +1,17 @@
+"""
+cd - change the working directory
+"""
+
 from ..Transformer import TransformerSingle
 
 
 class TransformCd(TransformerSingle):
+    """ transform cd commands """
 
-    def canBeAppliedOn(cmd: str) -> bool:
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
         return cmd.startswith("cd ")
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         return cmd

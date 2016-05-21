@@ -1,3 +1,8 @@
+"""
+Common interface for all Transformers. Contains multiple classes as classifier
+for identifying the different transformer types.
+"""
+
 import abc
 
 
@@ -6,20 +11,24 @@ class TransformerBase(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def canBeAppliedOn(cmd: str) -> bool:
+    def can_be_applied_on(cmd: str) -> bool:
+        """ Check, if this transformation can be applied on cmd """
         return False
 
     @staticmethod
     @abc.abstractmethod
-    def applyTransformationOn(cmd: str, container) -> str:
+    def apply_transformation_on(cmd: str, container) -> str:
+        """ Apply transformation on cmd """
         return cmd
 
 
+# pylint: disable=abstract-method
 class TransformerSingle(TransformerBase):
     """ Container class for all single instruction commands """
     pass
 
 
+# pylint: disable=abstract-method
 class TransformerMulti(TransformerBase):
     """ Container class for all multi instruction commands """
     pass

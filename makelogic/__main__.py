@@ -1,3 +1,9 @@
+"""
+This script provides the entry point for the main module function.
+For a given Makefile (and target) it will transform all actions for the given
+toolchain and put the result on the command line prompt
+"""
+
 import argparse
 from .MakeScript import MakeScript
 from .MakeKlee import MakeKlee

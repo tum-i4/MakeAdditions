@@ -1,8 +1,13 @@
-from ..Transformer import TransformerMulti
+"""
+ranlib - generate index to archive.
+"""
+
 from os import linesep
+from ..Transformer import TransformerMulti
 
 
 class TransformRanlib(TransformerMulti):
+    """ transform ranlib commands """
 
     # dirty hack for parsing this commands
     # TODO gather more test data and find a real implementation
@@ -14,8 +19,10 @@ class TransformRanlib(TransformerMulti):
         "fi",
     ]
 
-    def canBeAppliedOn(cmd: str) -> bool:
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
         return cmd in TransformRanlib.toremove
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         return (len(cmd.splitlines()) - 1) * linesep

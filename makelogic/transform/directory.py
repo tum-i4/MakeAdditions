@@ -1,6 +1,12 @@
+"""
+Helpfull method to collect a list of all subclasses of a given class
+"""
+
 from .Transformer import TransformerSingle, TransformerMulti
 # Do not remove this wildcard imports
 # They are needed for automatic transformer registration
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 from .single import *
 from .multi import *
 

@@ -1,19 +1,27 @@
+"""
+object linker
+"""
+
 from ..Transformer import TransformerSingle
 from ...config import LLVMLINK
+from ...constants import OPTIMIZERFLAGS
 
 
 class TransformCCLink(TransformerSingle):
+    """ transform linker commands """
 
-    def canBeAppliedOn(cmd: str) -> bool:
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
         return (any(cmd.startswith(s) for s in ["cc", "gcc"]) and
                 " -c " not in cmd)
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         # tokenize and remove the original command
         tokens = cmd.split()[1:]
 
         # remove optimizer flags
-        tokens = list(filter(lambda t: t not in ['-O1', '-O2', '-O3'], tokens))
+        tokens = [t for t in tokens if t not in OPTIMIZERFLAGS]
 
         if "-o" in tokens:
             # append .bc to the output file
@@ -26,17 +34,16 @@ class TransformCCLink(TransformerSingle):
             tokens.remove("-L.")
 
             # replace -l flags, if the library was llvm-compiled earlier
-            tokens[:] = [
+            tokens = [
                 "lib" + t[2:] + ".a.bc"
                 if (t.startswith("-l") and
                     "lib" + t[2:] + ".a.bc" in container.libs) else t
                 for t in tokens]
 
         # transform all linked .o-files to the corresponding .bc-file
-        tokens = map(
-            lambda x: x[:-2] + ".bc" if x.endswith(".o") else x, tokens)
+        tokens = [t[:-2] + ".bc" if t.endswith(".o") else t for t in tokens]
 
         # filter all command line options except -o
-        tokens = filter(lambda t: not t.startswith("-") or t == "-o", tokens)
+        tokens = [t for t in tokens if not t.startswith("-") or t == "-o"]
 
         return LLVMLINK + " " + " ".join(tokens)

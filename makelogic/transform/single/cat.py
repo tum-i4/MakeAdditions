@@ -1,10 +1,17 @@
+"""
+cat - concatenate files and print on the standard output
+"""
+
 from ..Transformer import TransformerSingle
 
 
 class TransformCat(TransformerSingle):
+    """ transform cat commands """
 
-    def canBeAppliedOn(cmd: str) -> bool:
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
         return cmd.startswith("cat ")
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         return ""

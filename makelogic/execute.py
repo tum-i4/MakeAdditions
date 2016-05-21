@@ -1,9 +1,13 @@
+"""
+Function for execute commands on the underlying OS
+"""
+
 from os.path import dirname, isfile
 from os import chdir, environ, getcwd, sep
 from subprocess import check_output
 
 
-def dryRunMakefile(makefile: str, target: str ="all") -> str:
+def dryrun_makefile(makefile: str, target: str="all") -> str:
     """ Perform a dry run on makefile with the given target and returns the
         output, i.e. all the commands necessary for the build """
 

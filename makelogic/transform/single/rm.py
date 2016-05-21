@@ -1,11 +1,18 @@
-from ..Transformer import TransformerSingle
+"""
+rm - remove files or directories
+"""
+
 import re
+from ..Transformer import TransformerSingle
 
 
 class TransformRm(TransformerSingle):
+    """ transform rm commands """
 
-    def canBeAppliedOn(cmd: str) -> bool:
-        return cmd.startswith("rm ") and re.search("rm -f \w+.a", cmd)
+    @staticmethod
+    def can_be_applied_on(cmd: str) -> bool:
+        return cmd.startswith("rm ") and re.search(r"rm -f \w+\.a", cmd)
 
-    def applyTransformationOn(cmd: str, container) -> str:
+    @staticmethod
+    def apply_transformation_on(cmd: str, container) -> str:
         return ""

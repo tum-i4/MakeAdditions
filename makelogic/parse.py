@@ -1,15 +1,19 @@
+"""
+Helpful functions for string and command parsing
+"""
+
 from typing import Sequence
 from os import linesep
 import re
 
 
-def commandEndsIn(line: str) -> bool:
+def command_ends_in(line: str) -> bool:
     """ Checks, wether the command in line ends in this line
         or continues on the next line """
     return line[-1] != '\\'
 
 
-def splitInCommands(text: str) -> Sequence[str]:
+def split_in_commands(text: str) -> Sequence[str]:
     """ Splits the commands in text to a list of commands """
 
     # Split the text in a list of lines
@@ -19,9 +23,9 @@ def splitInCommands(text: str) -> Sequence[str]:
     result = []
     cache = ""
 
-    for l in lines:
-        cache += l
-        if commandEndsIn(l):
+    for line in lines:
+        cache += line
+        if command_ends_in(line):
             # add the complete command to the result
             result.append(cache)
             cache = ""
@@ -37,14 +41,14 @@ def is_multicommand(cmd: str) -> bool:
     return any(c in cmd for c in ["&&", "|", ";", ">", "<"])
 
 
-def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
+def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
     """
     Translate all the annotations of the Makefile-Output to executable commands
     """
 
-    # makeOutput must start with directory information - the flag was given
-    if (not makeOutput or
-            not makeOutput[0].startswith("make: Entering directory ")):
+    # makeoutput must start with directory information - the flag was given
+    if (not makeoutput or
+            not makeoutput[0].startswith("make: Entering directory ")):
         raise Exception("Directory changes cannot be recognized")
 
     # Manage the directories with a stack
@@ -54,12 +58,12 @@ def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
     # some helpfull landmarks
     cdtoken = " # from make"
 
-    for cmd in makeOutput:
+    for cmd in makeoutput:
         if cmd.startswith("make"):
             # If the command belongs to make itself
 
             # Look for a directory action
-            match = re.search("^make(\[\d+\])?: (?P<action>Entering|Leaving) "
+            match = re.search(r"^make(\[\d+\])?: (?P<action>Entering|Leaving) "
                               "directory '(?P<dir>[^']*)'$", cmd)
 
             if match:
@@ -75,7 +79,7 @@ def translateMakeAnnotations(makeOutput: Sequence[str])-> Sequence[str]:
 
             else:
                 # Maybe not everything is supported (yet) ;(
-                raise(Exception("Unsupported make command: " + cmd))
+                raise Exception("Unsupported make command: " + cmd)
 
         else:
             result.append(cmd)

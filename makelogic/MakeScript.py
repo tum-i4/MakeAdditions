@@ -1,8 +1,13 @@
+"""
+This class represents and stores the tasks and commands from a
+Makefile (and a specific target). It can be printed as an .sh-script
+"""
+
 import re
 from typing import Sequence
-from .execute import dryRunMakefile
-from .parse import splitInCommands, translateMakeAnnotations
 from os import linesep
+from .execute import dryrun_makefile
+from .parse import split_in_commands, translate_makeannotations
 
 
 class MakeScript:
@@ -28,10 +33,11 @@ class MakeScript:
 
         # look for generated libraries
         if cmd.startswith("ar cq "):
-            libmatch = re.search("ar cq (\w+.a)", cmd)
+            libmatch = re.search(r"ar cq (\w+.a)", cmd)
             if libmatch:
                 self.libs.add(libmatch.group(1) + ".bc")
 
+    # pylint: disable=no-self-use
     def transform(self, cmd: str) -> str:
         """ Apply transformation to the vanilla command before it is stored """
         return cmd
@@ -45,15 +51,16 @@ class MakeScript:
         new = cls()
 
         # collect the commands from a dryrun
-        cmds = translateMakeAnnotations(
-            splitInCommands(
-                dryRunMakefile(makefile, target)))
+        cmds = translate_makeannotations(
+            split_in_commands(
+                dryrun_makefile(makefile, target)))
 
         # store relevant information for later commands
-        map(new.register, cmds)
+        for cmd in cmds:
+            new.register(cmd)
 
         # and store the translated commands
-        new.cmds = list(map(new.transform, cmds))
+        new.cmds = [new.transform(cmd) for cmd in cmds]
 
         return new
 
@@ -77,7 +84,8 @@ class MakeScript:
         """
 
         # register the information of the commands
-        map(self.register, cmds)
+        for cmd in cmds:
+            self.register(cmd)
 
         # and store all the transformed commands
-        self.cmds.extend(list(map(self.transform, cmds)))
+        self.cmds.extend([self.transform(cmd) for cmd in cmds])
