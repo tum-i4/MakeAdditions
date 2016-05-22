@@ -3,11 +3,11 @@ ar - create, modify, and extract from archives
 """
 
 import re
-from ..Transformer import TransformerSingle
+from ..Transformer import TransformerLlvm
 from ...config import LLVMLINK
 
 
-class TransformAr(TransformerSingle):
+class TransformAr(TransformerLlvm):
     """ transform ar commands """
 
     @staticmethod

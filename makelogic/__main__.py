@@ -58,20 +58,27 @@ def main():
         print("Nothing to be done for '" + args.target + "'")
         return
 
+    print("Start normal make process for '" + args.target + "' ...")
+
     if not args.just_record:
         # execute make and transform commands
         llvm = MakeLlvm().from_makefile(makefile, args.target)
+        print(" ... done")
 
         if not args.dry_run:
             # Execute all the captured and transformed commands
+            print("Run transformed make commands ...")
             llvm.execute_cmds()
+            print(" ... done")
         else:
             # Output instead of execution for dry runs
             print(llvm)
 
     else:
         # run make and print recorded commands
-        print(MakeScript.from_makefile(makefile, args.target))
+        plain = MakeScript.from_makefile(makefile, args.target)
+        print(" ... done")
+        print(plain)
 
 
 if __name__ == "__main__":

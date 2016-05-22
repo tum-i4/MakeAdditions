@@ -5,6 +5,7 @@ Helpful functions for string and command parsing
 from typing import Sequence
 from os import linesep
 import re
+from .constants import MAKEANNOTATIONHINT
 
 
 def command_ends_in(line: str) -> bool:
@@ -78,9 +79,6 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
     dirstack = []
     result = []
 
-    # some helpfull landmarks
-    cdtoken = " # from make"
-
     for cmd in makeoutput:
         if cmd.startswith("make"):
             # If the command belongs to make itself
@@ -94,11 +92,12 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
 
                 if match.group('action') == 'Entering':
                     dirstack.append(match.group('dir'))
-                    result.append("cd " + match.group('dir') + cdtoken)
+                    result.append(
+                        "cd " + match.group('dir') + MAKEANNOTATIONHINT)
 
                 elif match.group('action') == 'Leaving':
                     lastdir = dirstack.pop()
-                    result.append("cd " + lastdir + cdtoken)
+                    result.append("cd " + lastdir + MAKEANNOTATIONHINT)
                 continue
 
             # Look for a target with nothing to to

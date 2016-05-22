@@ -37,6 +37,7 @@ def run_make_with_debug_shell(makefile: str, target: str="all") -> str:
     chdir(dirname(makefile))
 
     # actually call make with given args on this file
+    # TODO Exscape evil shell target
     output = check_output(
         'make --print-directory --quiet SHELL="sh -x" ' + target,
         env=english, shell=True, stderr=STDOUT)

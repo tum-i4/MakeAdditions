@@ -23,12 +23,6 @@ class TransformerBase(metaclass=abc.ABCMeta):
 
 
 # pylint: disable=abstract-method
-class TransformerSingle(TransformerBase):
-    """ Container class for all single instruction commands """
-    pass
-
-
-# pylint: disable=abstract-method
-class TransformerMulti(TransformerBase):
-    """ Container class for all multi instruction commands """
+class TransformerLlvm(TransformerBase):
+    """ Container class for all llvm transformer"""
     pass

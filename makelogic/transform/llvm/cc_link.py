@@ -2,12 +2,12 @@
 object linker
 """
 
-from ..Transformer import TransformerSingle
+from ..Transformer import TransformerLlvm
 from ...config import LLVMLINK
 from ...constants import OPTIMIZERFLAGS
 
 
-class TransformCCLink(TransformerSingle):
+class TransformCCLink(TransformerLlvm):
     """ transform linker commands """
 
     @staticmethod

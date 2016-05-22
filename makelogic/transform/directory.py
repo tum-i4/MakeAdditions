@@ -2,27 +2,19 @@
 Helpfull method to collect a list of all subclasses of a given class
 """
 
-from .Transformer import TransformerSingle, TransformerMulti
-# Do not remove this wildcard imports
-# They are needed for automatic transformer registration
+from .Transformer import TransformerLlvm
+# Do not remove this wildcard import
+# It is needed for automatic transformer registration
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
-from .single import *
-from .multi import *
+from .llvm import *
 
 
-def list_all_single_transformers():
+def list_all_llvm_transformers():
     """
     Get a list of all available transformers for single instruction commands
     """
-    return list_all_subclasses(TransformerSingle)
-
-
-def list_all_multi_transformers():
-    """
-    Get a list of all available transformers for multi instruction commands
-    """
-    return list_all_subclasses(TransformerMulti)
+    return list_all_subclasses(TransformerLlvm)
 
 
 def list_all_subclasses(superclass):

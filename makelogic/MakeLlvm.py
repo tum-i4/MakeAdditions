@@ -8,7 +8,6 @@ from os import linesep
 from sys import stderr
 from .transform import directory
 from .MakeScript import MakeScript
-from .parse import is_multicommand
 
 
 class MakeLlvm(MakeScript):
@@ -24,23 +23,20 @@ class MakeLlvm(MakeScript):
         super(MakeLlvm, self).__init__()
 
         # Counter for failed transformations
-        self.fails = 0
+        self.skipped = 0
 
     def transform(self, cmd: str):
         # get all relevant transformations
-        if is_multicommand(cmd):
-            relevant = directory.list_all_multi_transformers()
-        else:
-            relevant = directory.list_all_single_transformers()
+        relevant = directory.list_all_llvm_transformers()
 
         # filter for applicable transformations
         applicable = [transformer for transformer in relevant
                       if transformer.can_be_applied_on(cmd)]
 
         if not applicable:
-            # if no transformation is applicable, mark this error
-            self.fails += 1
-            return cmd + self.__NOTRANSFORMATIONCOMMENT
+            # if no transformation is applicable, skip this command
+            self.skipped += 1
+            return ""
         elif len(applicable) == 1:
             # if exact one transformation is applicable, apply it
             return applicable[0].apply_transformation_on(cmd, self)
@@ -55,10 +51,10 @@ class MakeLlvm(MakeScript):
         result = super(MakeLlvm, self).__str__()
 
         # Append a warning, if there were untransformed commands
-        if self.fails > 0:
+        if self.skipped > 0:
             result += (
                 linesep +
-                "# Warning {0} commands were not transformed ({1:.2%})".format(
-                    self.fails, self.fails / len(self.cmds)))
+                "# Info: {0} commands were not skipped ({1:.2%})".format(
+                    self.skipped, self.skipped / len(self.cmds)))
 
         return result

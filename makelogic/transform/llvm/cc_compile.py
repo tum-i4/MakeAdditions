@@ -2,12 +2,12 @@
 C compiler
 """
 
-from ..Transformer import TransformerSingle
+from ..Transformer import TransformerLlvm
 from ...config import CLANG
 from ...constants import OPTIMIZERFLAGS
 
 
-class TransformCCCompile(TransformerSingle):
+class TransformCCCompile(TransformerLlvm):
     """ transform compile commands """
 
     @staticmethod
