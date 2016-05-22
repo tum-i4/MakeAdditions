@@ -3,6 +3,7 @@ rm - remove files or directories
 """
 
 from ..Transformer import TransformerLlvm
+from ...constants import EXECFILEEXTENSION
 
 
 class TransformAr(TransformerLlvm):
@@ -21,7 +22,7 @@ class TransformAr(TransformerLlvm):
         for file in files:
             embrace = ""
 
-            # look for ' and "
+            # look for embracing ' and "
             if file.startswith("'") and file.endswith("'"):
                 file = file[1:-1]
                 embrace = "'"
@@ -30,8 +31,11 @@ class TransformAr(TransformerLlvm):
                 embrace = '"'
 
             if file.endswith(".o") or file.endswith(".a"):
+                # simply append .bc to normal compiled files
                 new.append(embrace + file + ".bc" + embrace)
             elif '.' not in file:
-                new.append(embrace + file + ".x.bc" + embrace)
+                # add .x.bc to executables
+                new.append(
+                    embrace + file + EXECFILEEXTENSION + ".bc" + embrace)
 
         return "rm -f " + " ".join(new) if new else ""

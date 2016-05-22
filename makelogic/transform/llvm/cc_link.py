@@ -4,7 +4,7 @@ object linker
 
 from ..Transformer import TransformerLlvm
 from ...config import LLVMLINK
-from ...constants import OPTIMIZERFLAGS
+from ...constants import OPTIMIZERFLAGS, EXECFILEEXTENSION
 
 
 class TransformCCLink(TransformerLlvm):
@@ -26,7 +26,7 @@ class TransformCCLink(TransformerLlvm):
         if "-o" in tokens:
             # append .bc to the output file
             pos = tokens.index("-o")
-            tokens[pos + 1] = tokens[pos + 1] + ".x.bc"
+            tokens[pos + 1] = tokens[pos + 1] + EXECFILEEXTENSION + ".bc"
 
         # If we compile against a previos compiled library
         if "-L." in tokens:
