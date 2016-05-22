@@ -10,12 +10,14 @@ from shlex import quote
 from typing import Sequence
 
 
-def makefile_execution(f):
+def makefile_execution(func):
     """
     Small decorator for preparing and checking the environment to call make
     """
-    @wraps(f)
+    @wraps(func)
     def wrapper(makefile: str, targets: Sequence[str]):
+        """ Wrapper for the makefile environment"""
+
         # Target list is required
         if not targets:
             raise ValueError("Unknown target")
@@ -31,7 +33,7 @@ def makefile_execution(f):
         chdir(dirname(makefile))
 
         # Execute the decorated function
-        result = f(makefile, targets)
+        result = func(makefile, targets)
 
         # return to the previous directory
         chdir(cwd)
@@ -41,7 +43,7 @@ def makefile_execution(f):
 
 
 @makefile_execution
-def run_make_with_debug_shell(makefile: str, targets: Sequence[str]) -> str:
+def run_make_with_debug_shell(_: str, targets: Sequence[str]) -> str:
     """ Run make and add all executed shell commands to the output """
 
     output = check_output(
@@ -53,7 +55,7 @@ def run_make_with_debug_shell(makefile: str, targets: Sequence[str]) -> str:
 
 
 @makefile_execution
-def has_make_something_todo(makefile: str, targets: Sequence[str]) -> bool:
+def has_make_something_todo(_: str, targets: Sequence[str]) -> bool:
     """ Check, if the make command actually does something """
     return call(["make", "--question"] + targets) != 0
 

@@ -66,6 +66,10 @@ class MakeScript:
         return linesep.join(self.cmds)
 
     def execute_cmds(self):
+        """
+        Execute all the transformed commands. Hopefully a full llvm-build
+        """
+
         # TODO: realy execute the commands here
         # TODO: filter empty comands beforehand
         pass

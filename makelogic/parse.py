@@ -3,7 +3,6 @@ Helpful functions for string and command parsing
 """
 
 from typing import Sequence
-from os import linesep
 import re
 from .constants import MAKEANNOTATIONHINT
 
