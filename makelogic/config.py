@@ -3,8 +3,9 @@ Load global configurations, if they exist in a config.ini file
 """
 
 import configparser
+from os import path
 CONFIG = configparser.ConfigParser()
-CONFIG.read('config.ini')
+CONFIG.read(path.join(path.dirname(__file__), "..", "config.ini"))
 
 CLANG = CONFIG.get("toolchain", "clang", fallback="clang")
 LLVMLINK = CONFIG.get("toolchain", "llvmlink", fallback="llvm-link")

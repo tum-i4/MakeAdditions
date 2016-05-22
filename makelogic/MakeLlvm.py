@@ -54,7 +54,7 @@ class MakeLlvm(MakeScript):
         if self.skipped > 0:
             result += (
                 linesep +
-                "# Info: {0} commands were not skipped ({1:.2%})".format(
+                "# Info: {0} commands were skipped ({1:.2%})".format(
                     self.skipped, self.skipped / len(self.cmds)))
 
         return result

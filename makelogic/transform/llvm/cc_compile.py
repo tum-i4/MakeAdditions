@@ -6,13 +6,16 @@ from ..Transformer import TransformerLlvm
 from ...config import CLANG
 from ...constants import OPTIMIZERFLAGS
 
+COMPILERS = ["cc", "gcc", "clang", CLANG]
+
 
 class TransformCCCompile(TransformerLlvm):
     """ transform compile commands """
 
     @staticmethod
     def can_be_applied_on(cmd: str) -> bool:
-        return any(cmd.startswith(s) for s in ["cc", "gcc"]) and " -c " in cmd
+        return (
+            any(cmd.startswith(s + " ") for s in COMPILERS) and " -c " in cmd)
 
     @staticmethod
     def apply_transformation_on(cmd: str, container) -> str:

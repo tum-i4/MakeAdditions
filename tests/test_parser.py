@@ -74,6 +74,17 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
             ])
         )
 
+    @unittest.skip("More refactoring is needed")
+    def test_target_output_is_commented(self):
+        self.assertEqual(
+            ["# make: start working on target 'all'"],
+            translate_makeannotations(["make all"])
+        )
+        self.assertEqual(
+            ["# make: start working on target 'my-target'"],
+            translate_makeannotations(["make my-target"])
+        )
+
 
 class TestIsNoop(unittest.TestCase):
 

@@ -72,15 +72,25 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
                 continue
 
             # Look for a target with nothing to to
-            match = re.search(r"make(\[\d+\])?: Nothing to be done for "
-                              r"'(?P<target>[^']+)'", cmd)
+            match = re.search(r"^make(\[\d+\])?: Nothing to be done for "
+                              r"'(?P<target>[^']+)'$", cmd)
             if match:
                 # It's a nothing to do notice
                 result.append(
-                    "# make does nothing for " + match.group("target"))
+                    "# make does nothing for '" + match.group("target") + "'")
+                continue
+
+            # look for subtargets
+            match = re.search(r"^make (?P<target>[\w-]+)$", cmd)
+
+            if match:
+                # Start making a sub target
+                result.append("# make: start working on target '" +
+                              match.group("target") + "'")
                 continue
 
             # Maybe not everything is supported (yet) ;(
+            # result.append("# Unsupported make command: " + cmd)
             raise Exception("Unsupported make command: " + cmd)
 
         else:

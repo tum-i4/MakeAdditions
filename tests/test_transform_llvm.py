@@ -37,6 +37,19 @@ class TestTransformLlvm(unittest.TestCase):
                 "gcc -Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 "
                 "-c blocksort.c")
         )
+        self.assertEqual(
+            CLANG + " -emit-llvm -g -O0 -c -o main.bc main.c",
+            self.llvm.transform(CLANG + "    -c -o main.bc main.c")
+        )
+        self.assertEqual(
+            CLANG + " -emit-llvm -O0 -DHAVE_CONFIG_H -I. -I../src -g " +
+            "-MT lib.lo -MD -MP -MF .deps/lib.Tpo -c lib.c " +
+            "-fPIC -DPIC -o .libs/lib.bc",
+            self.llvm.transform(
+                CLANG + " -DHAVE_CONFIG_H -I. -I../src -g " +
+                "-O2  -MT lib.lo -MD -MP -MF .deps/lib.Tpo -c lib.c " +
+                "-fPIC -DPIC -o .libs/lib.o")
+        )
 
     def test_cc_link(self):
         self.assertEqual(
