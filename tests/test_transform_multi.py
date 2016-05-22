@@ -1,12 +1,12 @@
 import unittest
 from os import linesep
-from makelogic.MakeKlee import MakeKlee
+from makelogic.MakeLlvm import MakeLlvm
 
 
 class TestTransformMulti(unittest.TestCase):
 
     def setUp(self):
-        self.klee = MakeKlee()
+        self.klee = MakeLlvm()
 
     def test_ranlib(self):
         self.assertEqual(linesep * 4, self.klee.transform(

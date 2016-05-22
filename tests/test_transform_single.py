@@ -1,12 +1,12 @@
 import unittest
-from makelogic.MakeKlee import MakeKlee
+from makelogic.MakeLlvm import MakeLlvm
 from makelogic.config import CLANG, LLVMLINK
 
 
 class TestTransformSingle(unittest.TestCase):
 
     def setUp(self):
-        self.klee = MakeKlee()
+        self.klee = MakeLlvm()
 
     def test_empty(self):
         self.assertEqual("", self.klee.transform(""))

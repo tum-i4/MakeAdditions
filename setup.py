@@ -16,7 +16,7 @@ setup(
     license="Apache Software License",
     entry_points={
         'console_scripts': [
-            'makelogic = makelogic.__main__:main'
+            'make+llvm = makelogic.__main__:main'
         ]
     },
     classifiers=[

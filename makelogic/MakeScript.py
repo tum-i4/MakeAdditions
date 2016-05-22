@@ -68,6 +68,11 @@ class MakeScript:
         """ Print the stored command as a .sh-script """
         return self.__HEADER + linesep.join(self.cmds)
 
+    def execute_cmds(self):
+        # TODO: realy execute the commands here
+        # TODO: filter empty comands beforehand
+        pass
+
     def append_cmd(self, cmd: str):
         """ Append a command to the internal command storage """
 

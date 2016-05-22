@@ -11,17 +11,17 @@ from .MakeScript import MakeScript
 from .parse import is_multicommand
 
 
-class MakeKlee(MakeScript):
+class MakeLlvm(MakeScript):
 
     """
-    The .sh-script representation of the tasks from a Makefile converted to
-    the logic of KLEE analysis, i.e. using llvm code
+    The .sh-script representation of the commands from a Makefile target
+    converted to the logic for generating llvm-bytecode
     """
 
     __NOTRANSFORMATIONCOMMENT = " # Sorry, no transformation found"
 
     def __init__(self):
-        super(MakeKlee, self).__init__()
+        super(MakeLlvm, self).__init__()
 
         # Counter for failed transformations
         self.fails = 0
@@ -52,7 +52,7 @@ class MakeKlee(MakeScript):
             raise Exception("Multiple Transformers match")
 
     def __str__(self):
-        result = super(MakeKlee, self).__str__()
+        result = super(MakeLlvm, self).__str__()
 
         # Append a warning, if there were untransformed commands
         if self.fails > 0:
