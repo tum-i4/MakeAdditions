@@ -8,35 +8,6 @@ import re
 from .constants import MAKEANNOTATIONHINT
 
 
-def command_ends_in(line: str) -> bool:
-    """ Checks, wether the command in line ends in this line
-        or continues on the next line """
-    return line[-1] != '\\'
-
-
-def split_in_commands(text: str) -> Sequence[str]:
-    """ Splits the commands in text to a list of commands """
-
-    # Split the text in a list of lines
-    lines = text.splitlines()
-
-    # some temporary variables
-    result = []
-    cache = ""
-
-    for line in lines:
-        cache += line
-        if command_ends_in(line):
-            # add the complete command to the result
-            result.append(cache)
-            cache = ""
-        else:
-            # merge multi line command in the cache
-            cache += linesep
-
-    return result
-
-
 def extract_debugshell_and_makefile(makeoutput: str) -> Sequence[str]:
     """
     Extract a list of commands, that are logged in shell debug output,
@@ -58,11 +29,6 @@ def extract_debugshell_and_makefile(makeoutput: str) -> Sequence[str]:
             result.append(match.group("command"))
 
     return result
-
-
-def is_multicommand(cmd: str) -> bool:
-    """ Checks, if a command combines multiple instructions """
-    return any(c in cmd for c in ["&&", "|", ";", ">", "<"])
 
 
 def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:

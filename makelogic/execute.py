@@ -8,14 +8,6 @@ from subprocess import CalledProcessError, check_output, STDOUT
 from typing import Sequence
 
 
-def dryrun_makefile(makefile: str, target: str="all") -> str:
-    """ Perform a dry run on makefile with the given target and returns the
-        output, i.e. all the commands necessary for the build """
-
-    return run_make_with_commands(
-        makefile, ["--dry-run", "--print-directory", target])
-
-
 def run_make_with_debug_shell(makefile: str, target: str="all") -> str:
     """ Run make and add all executed shell commands to the output """
 
