@@ -60,3 +60,24 @@ class TestTransformLlvm(unittest.TestCase):
             LLVMLINK + " -o libbz2.a.bc blocksort.bc huffman.bc",
             self.llvm.transform("ar cq libbz2.a blocksort.o huffman.o")
         )
+
+    def test_rm(self):
+        self.assertEqual(
+            "rm -f main.o.bc",
+            self.llvm.transform("rm -f main.o"))
+
+        self.assertEqual(
+            "rm -f lib.a.bc",
+            self.llvm.transform("rm -f lib.a"))
+
+        self.assertEqual(
+            "rm -f executable.x.bc",
+            self.llvm.transform("rm -f executable"))
+
+        self.assertEqual("", self.llvm.transform("rm -f notrelevant.sh"))
+
+        self.assertEqual("rm -f *.o.bc", self.llvm.transform("rm -f *.o"))
+
+        self.assertEqual(
+            "rm -f '*.o.bc'",
+            self.llvm.transform("rm -f '*.o'"))
