@@ -9,6 +9,7 @@ from os import getcwd, path
 from sys import stderr
 from .MakeScript import MakeScript
 from .MakeLlvm import MakeLlvm
+from .execute import has_make_something_todo
 
 
 def main():
@@ -29,6 +30,7 @@ def main():
     parser.add_argument(
         'target',
         nargs="?",
+        default="all",
         help='Target for make'
     )
     parser.add_argument(
@@ -52,18 +54,25 @@ def main():
         print("Error: Makefile not found. Tried", makefile, file=stderr)
         return
 
-    if args.just_record:
-        # run make and print recorded commands
-        print(MakeScript.from_makefile(makefile, args.target))
+    if not has_make_something_todo(makefile, args.target):
+        print("Nothing to be done for '" + args.target + "'")
         return
 
-    # execute make and transform commands
-    llvm = MakeLlvm().from_makefile(makefile, args.target)
+    if not args.just_record:
+        # execute make and transform commands
+        llvm = MakeLlvm().from_makefile(makefile, args.target)
 
-    if args.dry_run:
-        print(llvm)
+        if not args.dry_run:
+            # Execute all the captured and transformed commands
+            llvm.execute_cmds()
+        else:
+            # Output instead of execution for dry runs
+            print(llvm)
+
     else:
-        llvm.execute_cmds()
+        # run make and print recorded commands
+        print(MakeScript.from_makefile(makefile, args.target))
+
 
 if __name__ == "__main__":
     main()

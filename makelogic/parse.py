@@ -36,6 +36,29 @@ def split_in_commands(text: str) -> Sequence[str]:
     return result
 
 
+def extract_debugshell_and_makefile(makeoutput: str) -> Sequence[str]:
+    """
+    Extract a list of commands, that are logged in shell debug output,
+    and annotations of the makefile from output of a make run
+    """
+
+    result = []
+
+    # Each line can be a relevant command
+    for line in makeoutput.splitlines():
+
+        if line.startswith("make"):
+            # extract make annotations
+            result.append(line)
+
+        elif line.startswith("+"):
+            # extract shell debug output
+            match = re.search(r"\++ (?P<command>.*)", line)
+            result.append(match.group("command"))
+
+    return result
+
+
 def is_multicommand(cmd: str) -> bool:
     """ Checks, if a command combines multiple instructions """
     return any(c in cmd for c in ["&&", "|", ";", ">", "<"])

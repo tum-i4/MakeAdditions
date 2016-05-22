@@ -1,6 +1,10 @@
 import unittest
 from textwrap import dedent
-from makelogic.parse import split_in_commands, translate_makeannotations
+from makelogic.parse import (
+    split_in_commands,
+    translate_makeannotations,
+    extract_debugshell_and_makefile
+)
 
 
 class TestPaserSplitInCommands(unittest.TestCase):
@@ -34,6 +38,45 @@ class TestPaserSplitInCommands(unittest.TestCase):
             line 1 \\
                 -line 2
             """)))
+
+
+class TestExtractor(unittest.TestCase):
+
+    def test_make_statement(self):
+        self.assertEqual(
+            ["make: Entering directory '/tmp'"],
+            extract_debugshell_and_makefile("make: Entering directory '/tmp'"))
+
+    def test_nonsense(self):
+        self.assertEqual([], extract_debugshell_and_makefile("Hello world"))
+
+    def test_simple_command(self):
+        self.assertEqual(
+            ["cc -c -o main.o main.c"],
+            extract_debugshell_and_makefile("+ cc -c -o main.o main.c")
+        )
+
+    def test_nested_command(self):
+        self.assertEqual(
+            ["cc -c -o main.o main.c"],
+            extract_debugshell_and_makefile("++++ cc -c -o main.o main.c")
+        )
+
+    def test_small_block(self):
+        self.assertEqual([
+            "make: Entering directory '/tmp'",
+            "cc -c -o main.o main.c",
+            "cc -c -o divisible.o divisible.c",
+            "cc -o divisible main.o divisible.o",
+            "make: Leaving directory '/tmp'"],
+            extract_debugshell_and_makefile(dedent("""\
+            make: Entering directory '/tmp'
+            + cc -c -o main.o main.c
+            + cc -c -o divisible.o divisible.c
+            + cc -o divisible main.o divisible.o
+            make: Leaving directory '/tmp'
+            """))
+        )
 
 
 class TestTranslateMakeAnnotations(unittest.TestCase):

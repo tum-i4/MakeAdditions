@@ -6,18 +6,15 @@ Makefile (and a specific target). It can be printed as an .sh-script
 import re
 from typing import Sequence
 from os import linesep
-from .execute import dryrun_makefile
-from .parse import split_in_commands, translate_makeannotations
+from .execute import run_make_with_debug_shell
+from .parse import translate_makeannotations, extract_debugshell_and_makefile
 
 
 class MakeScript:
 
     """
-    The .sh-script representation of the tasks from a Makefile
+    The sh-script representation of the tasks from a Makefile
     """
-
-    # Header for the output of the makescript
-    __HEADER = "#!/bin/sh" + (linesep * 2)
 
     def __init__(self):
         """ Just init an empty makefile """
@@ -50,10 +47,10 @@ class MakeScript:
         # Start with an empty Makescript
         new = cls()
 
-        # collect the commands from a dryrun
+        # Run make and extract relevant commands
         cmds = translate_makeannotations(
-            split_in_commands(
-                dryrun_makefile(makefile, target)))
+            extract_debugshell_and_makefile(
+                run_make_with_debug_shell(makefile, target)))
 
         # store relevant information for later commands
         for cmd in cmds:
@@ -65,8 +62,8 @@ class MakeScript:
         return new
 
     def __str__(self):
-        """ Print the stored command as a .sh-script """
-        return self.__HEADER + linesep.join(self.cmds)
+        """ Print the stored command as a sh-script """
+        return linesep.join(self.cmds)
 
     def execute_cmds(self):
         # TODO: realy execute the commands here
