@@ -5,7 +5,7 @@ Function for execute commands on the underlying OS
 from functools import wraps
 from os.path import dirname, isfile
 from os import chdir, environ, getcwd, sep
-from subprocess import call, check_output, STDOUT
+from subprocess import call, check_output, STDOUT, DEVNULL
 from shlex import quote
 from typing import Sequence
 
@@ -57,7 +57,8 @@ def run_make_with_debug_shell(_: str, targets: Sequence[str]) -> str:
 @makefile_execution
 def has_make_something_todo(_: str, targets: Sequence[str]) -> bool:
     """ Check, if the make command actually does something """
-    return call(["make", "--question"] + targets) != 0
+    return call(
+        ["make", "--question"] + targets, stderr=DEVNULL, stdout=DEVNULL) != 0
 
 
 def english_environment():
