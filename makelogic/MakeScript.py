@@ -4,10 +4,12 @@ Makefile (and a specific target). It can be printed as an .sh-script
 """
 
 import re
+import subprocess
 from typing import Sequence
 from os import linesep
 from .execute import run_make_with_debug_shell
-from .parse import translate_makeannotations, extract_debugshell_and_makefile
+from .parse import (
+    is_noop, extract_debugshell_and_makefile, translate_makeannotations)
 
 
 class MakeScript:
@@ -67,12 +69,13 @@ class MakeScript:
 
     def execute_cmds(self):
         """
-        Execute all the transformed commands. Hopefully a full llvm-build
+        Execute all the transformed commands.
+        Hopefully this results in a full llvm-build
         """
-
-        # TODO: realy execute the commands here
-        # TODO: filter empty comands beforehand
-        pass
+        for cmd in self.cmds:
+            if not is_noop(cmd):
+                # Maybe this shell=True is evil, but what can we do?
+                subprocess.call(cmd, shell=True)
 
     def append_cmd(self, cmd: str):
         """ Append a command to the internal command storage """

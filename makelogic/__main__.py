@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         'target',
         nargs="*",
-        default="all",
+        default=["all"],
         help='Target for make'
     )
     parser.add_argument(

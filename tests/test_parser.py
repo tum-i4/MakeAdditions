@@ -1,8 +1,9 @@
 import unittest
 from textwrap import dedent
 from makelogic.parse import (
+    is_noop,
+    extract_debugshell_and_makefile,
     translate_makeannotations,
-    extract_debugshell_and_makefile
 )
 
 
@@ -72,3 +73,25 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
                 "make: Leaving directory 'dir1'"
             ])
         )
+
+
+class TestIsNoop(unittest.TestCase):
+
+    def test_empty(self):
+        self.assertTrue(is_noop(""))
+
+    def test_spaces(self):
+        self.assertTrue(is_noop("   "))
+
+    def test_command(self):
+        self.assertFalse(is_noop("cd dir"))
+        self.assertFalse(is_noop("cc -c main.c"))
+
+    def test_comment(self):
+        self.assertTrue(is_noop("# comment"))
+
+    def test_comment_with_leading_space(self):
+        self.assertTrue(is_noop(" # comment"))
+
+    def test_command_with_comment(self):
+        self.assertFalse(is_noop("cd dir # change directory"))

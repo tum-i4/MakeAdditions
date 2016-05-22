@@ -7,6 +7,12 @@ import re
 from .constants import MAKEANNOTATIONHINT
 
 
+def is_noop(cmd: str) -> bool:
+    """ Checks, if the given command perform no operation, e.g. pure
+    comment strings or all sorts of empty strings """
+    return not cmd.strip() or cmd.strip().startswith("#")
+
+
 def extract_debugshell_and_makefile(makeoutput: str) -> Sequence[str]:
     """
     Extract a list of commands, that are logged in shell debug output,
