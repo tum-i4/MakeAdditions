@@ -6,6 +6,7 @@ from functools import wraps
 from os.path import dirname, isfile
 from os import chdir, environ, getcwd, sep
 from subprocess import call, check_output, STDOUT
+from shlex import quote
 from typing import Sequence
 
 
@@ -21,7 +22,7 @@ def makefile_execution(f):
 
         # at first some input sanitizing
         check_makefile(makefile)
-        # TODO: sanitize target list
+        targets = [quote(t) for t in targets]
 
         # save the current directory for returning to it later
         cwd = getcwd()
@@ -43,7 +44,6 @@ def makefile_execution(f):
 def run_make_with_debug_shell(makefile: str, targets: Sequence[str]) -> str:
     """ Run make and add all executed shell commands to the output """
 
-    # TODO Escape evil shell target
     output = check_output(
         'make --print-directory --quiet SHELL="sh -x" ' + " ".join(targets),
         env=english_environment(), shell=True, stderr=STDOUT)
