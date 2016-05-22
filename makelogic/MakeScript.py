@@ -40,9 +40,9 @@ class MakeScript:
         return cmd
 
     @classmethod
-    def from_makefile(cls, makefile, target=None):
+    def from_makefile(cls, makefile, targets=None):
         """ Alternative constructor from makefile on the filesystem """
-        target = target or "all"
+        targets = targets or ["all"]
 
         # Start with an empty Makescript
         new = cls()
@@ -50,7 +50,7 @@ class MakeScript:
         # Run make and extract relevant commands
         cmds = translate_makeannotations(
             extract_debugshell_and_makefile(
-                run_make_with_debug_shell(makefile, target)))
+                run_make_with_debug_shell(makefile, targets)))
 
         # store relevant information for later commands
         for cmd in cmds:

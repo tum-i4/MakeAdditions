@@ -54,7 +54,7 @@ def main():
         print("Error: Makefile not found. Tried", makefile, file=stderr)
         return
 
-    if not has_make_something_todo(makefile, args.target):
+    if not has_make_something_todo(makefile, [args.target]):
         print("Nothing to be done for '" + args.target + "'")
         return
 
@@ -62,7 +62,7 @@ def main():
 
     if not args.just_record:
         # execute make and transform commands
-        llvm = MakeLlvm().from_makefile(makefile, args.target)
+        llvm = MakeLlvm().from_makefile(makefile, [args.target])
         print(" ... done")
 
         if not args.dry_run:
@@ -76,7 +76,7 @@ def main():
 
     else:
         # run make and print recorded commands
-        plain = MakeScript.from_makefile(makefile, args.target)
+        plain = MakeScript.from_makefile(makefile, [args.target])
         print(" ... done")
         print(plain)
 
