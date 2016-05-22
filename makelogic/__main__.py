@@ -29,7 +29,7 @@ def main():
 
     parser.add_argument(
         'target',
-        nargs="?",
+        nargs="*",
         default="all",
         help='Target for make'
     )
@@ -54,15 +54,15 @@ def main():
         print("Error: Makefile not found. Tried", makefile, file=stderr)
         return
 
-    if not has_make_something_todo(makefile, [args.target]):
-        print("Nothing to be done for '" + args.target + "'")
+    if not has_make_something_todo(makefile, args.target):
+        print("Nothing to be done for '" + " ".join(args.target) + "'")
         return
 
-    print("Start normal make process for '" + args.target + "' ...")
+    print("Start normal make process for '" + " ".join(args.target) + "' ...")
 
     if not args.just_record:
         # execute make and transform commands
-        llvm = MakeLlvm().from_makefile(makefile, [args.target])
+        llvm = MakeLlvm().from_makefile(makefile, args.target)
         print(" ... done")
 
         if not args.dry_run:
@@ -76,7 +76,7 @@ def main():
 
     else:
         # run make and print recorded commands
-        plain = MakeScript.from_makefile(makefile, [args.target])
+        plain = MakeScript.from_makefile(makefile, args.target)
         print(" ... done")
         print(plain)
 
