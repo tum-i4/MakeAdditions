@@ -46,7 +46,6 @@ def main():
     )
 
     args = parser.parse_args()
-    print(args)
     makefile = path.join(getcwd(), "Makefile")
 
     if not path.isfile(makefile):

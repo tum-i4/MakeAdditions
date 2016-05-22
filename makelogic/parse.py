@@ -64,7 +64,7 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
 
             # Look for a directory action
             match = re.search(r"^make(\[\d+\])?: (?P<action>Entering|Leaving) "
-                              "directory '(?P<dir>[^']*)'$", cmd)
+                              r"directory '(?P<dir>[^']*)'$", cmd)
 
             if match:
                 # It's a directory action
@@ -76,10 +76,19 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
                 elif match.group('action') == 'Leaving':
                     lastdir = dirstack.pop()
                     result.append("cd " + lastdir + cdtoken)
+                continue
 
-            else:
-                # Maybe not everything is supported (yet) ;(
-                raise Exception("Unsupported make command: " + cmd)
+            # Look for a target with nothing to to
+            match = re.search(r"make(\[\d+\])?: Nothing to be done for "
+                              r"'(?P<target>[^']+)'", cmd)
+            if match:
+                # It's a nothing to do notice
+                result.append(
+                    "# make does nothing for " + match.group("target"))
+                continue
+
+            # Maybe not everything is supported (yet) ;(
+            raise Exception("Unsupported make command: " + cmd)
 
         else:
             result.append(cmd)
