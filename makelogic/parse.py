@@ -74,7 +74,7 @@ def translate_to_commands(makeoutput: str) -> Sequence[str]:
             get_relevant_lines(makeoutput)))
 
 
-def check_debugshell_and_makefile(makeoutput: Sequence[str]):
+def check_debugshell_and_makefile(makeoutput: str):
     """
     Check if the Makefile output can be parsed and transformed automatically.
     Raises exceptions, if something looks weird
@@ -83,8 +83,9 @@ def check_debugshell_and_makefile(makeoutput: Sequence[str]):
     # makeoutput must start with directory information.
     # Reason: The --print-directory flag for make flag was given
     if (not makeoutput or
-            not makeoutput[0].startswith("make: Entering directory ")):
-        raise Exception("Directory changes cannot be recognized")
+            not makeoutput.startswith("make: Entering directory ")):
+        raise Exception(
+            "Directory changes cannot be recognized: " + makeoutput[0:35])
 
 
 def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:

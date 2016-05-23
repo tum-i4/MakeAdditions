@@ -54,13 +54,13 @@ class TestTranslateCommands(unittest.TestCase):
 class TestCheckDebugshellAndMakefile(unittest.TestCase):
 
     def test_empty(self):
-        self.assertRaises(Exception, check_debugshell_and_makefile, [])
+        self.assertRaises(Exception, check_debugshell_and_makefile, "")
 
     def test_no_directory_information(self):
-        self.assertRaises(Exception, check_debugshell_and_makefile, ['cmd'])
+        self.assertRaises(Exception, check_debugshell_and_makefile, 'cmd')
 
     def test_normal_commands_pass(self):
-        check_debugshell_and_makefile(["make: Entering directory 'dir1'"])
+        check_debugshell_and_makefile("make: Entering directory 'dir1'")
 
 
 class TestExtractDebugshell(unittest.TestCase):

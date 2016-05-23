@@ -34,8 +34,8 @@ def main():
         help='Target for make'
     )
     parser.add_argument(
-        '--dry-run',
-        dest="dry_run",
+        '--just-transform',
+        dest="just_transform",
         help="Print all generated llvm commands, but do not execute them",
         action="store_true",
     )
@@ -65,13 +65,13 @@ def main():
         llvm = MakeLlvm().from_makefile(makefile, args.target)
         print(" ... done")
 
-        if not args.dry_run:
+        if not args.just_transform:
             # Execute all the captured and transformed commands
             print("Run transformed make commands ...")
             llvm.execute_cmds()
             print(" ... done")
         else:
-            # Output instead of execution for dry runs
+            # Output instead of execution for just transform
             print(llvm)
 
     else:
