@@ -7,33 +7,83 @@ import re
 from .constants import MAKEANNOTATIONHINT
 
 
+class MakefileDirstack():
+    """
+    Helper class for transforming the entering and leaving directory
+    annotations of make output to corresponding cd commands
+    """
+
+    def __init__(self):
+        # Stack is needed to define, where we are after leaving
+        self.dirstack = []
+
+    def translate_if_dirannotation(self, cmd: str):
+        """
+        Transform make directory annotation and leave the rest untouched
+        """
+
+        if not cmd.startswith("make"):
+            # Just looking for make annotations
+            return cmd
+
+        # Look for a directory action
+        match = re.search(r"^make(\[\d+\])?: (?P<action>Entering|Leaving) "
+                          r"directory '(?P<dir>[^']*)'$", cmd)
+
+        # It's a directory action
+        if match:
+
+            if match.group('action') == 'Entering':
+                self.dirstack.append(match.group('dir'))
+                return "cd " + match.group('dir') + MAKEANNOTATIONHINT
+
+            elif match.group('action') == 'Leaving':
+                lastdir = self.dirstack.pop()
+                return "cd " + lastdir + MAKEANNOTATIONHINT
+
+        # return other commands unmodified
+        return cmd
+
+
 def is_noop(cmd: str) -> bool:
     """ Checks, if the given command perform no operation, e.g. pure
     comment strings or all sorts of empty strings """
     return not cmd.strip() or cmd.strip().startswith("#")
 
 
-def extract_debugshell_and_makefile(makeoutput: str) -> Sequence[str]:
+def extract_debugshell(makeoutput: Sequence[str]) -> Sequence[str]:
+    """ Extract all command invocations from shell debug statements and
+    make them to normal commands """
+    return [line.lstrip("+ ") for line in makeoutput]
+
+
+def get_relevant_lines(makeoutput: str) -> Sequence[str]:
+    """ Remove everything from make output, that is not a makefile annotation
+    and shell debug output, but leaves the + sign in front of them """
+    return [line for line in makeoutput.splitlines()
+            if line.startswith("make") or line.startswith("+")]
+
+
+def translate_to_commands(makeoutput: str) -> Sequence[str]:
+    """ Translate all the output from make, debug-shell and output of commands
+    during make, and translate them to executable commands """
+
+    return extract_debugshell(
+        translate_makeannotations(
+            get_relevant_lines(makeoutput)))
+
+
+def check_debugshell_and_makefile(makeoutput: Sequence[str]):
     """
-    Extract a list of commands, that are logged in shell debug output,
-    and annotations of the makefile from output of a make run
+    Check if the Makefile output can be parsed and transformed automatically.
+    Raises exceptions, if something looks weird
     """
 
-    result = []
-
-    # Each line can be a relevant command
-    for line in makeoutput.splitlines():
-
-        if line.startswith("make"):
-            # extract make annotations
-            result.append(line)
-
-        elif line.startswith("+"):
-            # extract shell debug output
-            match = re.search(r"\++ (?P<command>.*)", line)
-            result.append(match.group("command"))
-
-    return result
+    # makeoutput must start with directory information.
+    # Reason: The --print-directory flag for make flag was given
+    if (not makeoutput or
+            not makeoutput[0].startswith("make: Entering directory ")):
+        raise Exception("Directory changes cannot be recognized")
 
 
 def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
@@ -41,59 +91,20 @@ def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
     Translate all the annotations of the Makefile-Output to executable commands
     """
 
-    # makeoutput must start with directory information - the flag was given
-    if (not makeoutput or
-            not makeoutput[0].startswith("make: Entering directory ")):
-        raise Exception("Directory changes cannot be recognized")
+    dirstack = MakefileDirstack()
 
-    # Manage the directories with a stack
-    dirstack = []
-    result = []
+    makepatterns = (
+        # Message, if the target is already completed
+        r"^make(\[\d+\])?: Nothing to be done for '[^']+'$",
 
-    for cmd in makeoutput:
-        if cmd.startswith("make"):
-            # If the command belongs to make itself
+        # start working on a subtarget
+        r"^make (?P<target>[\w-]+)$",
+    )
 
-            # Look for a directory action
-            match = re.search(r"^make(\[\d+\])?: (?P<action>Entering|Leaving) "
-                              r"directory '(?P<dir>[^']*)'$", cmd)
-
-            if match:
-                # It's a directory action
-
-                if match.group('action') == 'Entering':
-                    dirstack.append(match.group('dir'))
-                    result.append(
-                        "cd " + match.group('dir') + MAKEANNOTATIONHINT)
-
-                elif match.group('action') == 'Leaving':
-                    lastdir = dirstack.pop()
-                    result.append("cd " + lastdir + MAKEANNOTATIONHINT)
-                continue
-
-            # Look for a target with nothing to to
-            match = re.search(r"^make(\[\d+\])?: Nothing to be done for "
-                              r"'(?P<target>[^']+)'$", cmd)
-            if match:
-                # It's a nothing to do notice
-                result.append(
-                    "# make does nothing for '" + match.group("target") + "'")
-                continue
-
-            # look for subtargets
-            match = re.search(r"^make (?P<target>[\w-]+)$", cmd)
-
-            if match:
-                # Start making a sub target
-                result.append("# make: start working on target '" +
-                              match.group("target") + "'")
-                continue
-
-            # Maybe not everything is supported (yet) ;(
-            # result.append("# Unsupported make command: " + cmd)
-            raise Exception("Unsupported make command: " + cmd)
-
-        else:
-            result.append(cmd)
-
-    return result
+    return [
+        "# " + cmd + MAKEANNOTATIONHINT
+        if cmd.startswith("make") and any(
+            re.search(pattern, cmd) for pattern in makepatterns)
+        else dirstack.translate_if_dirannotation(cmd)
+        for cmd in makeoutput
+    ]

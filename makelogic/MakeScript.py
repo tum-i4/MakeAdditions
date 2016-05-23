@@ -9,7 +9,10 @@ from typing import Sequence
 from os import linesep
 from .execute import run_make_with_debug_shell
 from .parse import (
-    is_noop, extract_debugshell_and_makefile, translate_makeannotations)
+    check_debugshell_and_makefile,
+    is_noop,
+    translate_to_commands
+)
 
 
 class MakeScript:
@@ -49,10 +52,14 @@ class MakeScript:
         # Start with an empty Makescript
         new = cls()
 
-        # Run make and extract relevant commands
-        cmds = translate_makeannotations(
-            extract_debugshell_and_makefile(
-                run_make_with_debug_shell(makefile, targets)))
+        # Collect the output from make with debug flags
+        output = run_make_with_debug_shell(makefile, targets)
+
+        # Check, if the output can be translated properly
+        check_debugshell_and_makefile(output)
+
+        # Translate all the commands
+        cmds = translate_to_commands(output)
 
         # store relevant information for later commands
         for cmd in cmds:
