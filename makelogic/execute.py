@@ -7,7 +7,6 @@ from os.path import dirname, isfile
 from os import chdir, environ, getcwd, sep
 from subprocess import call, check_output, STDOUT, DEVNULL
 from shlex import quote
-from typing import Sequence
 
 
 def makefile_execution(func):
@@ -15,7 +14,7 @@ def makefile_execution(func):
     Small decorator for preparing and checking the environment to call make
     """
     @wraps(func)
-    def wrapper(makefile: str, targets: Sequence[str]):
+    def wrapper(makefile, targets):
         """ Wrapper for the makefile environment"""
 
         # Target list is required
@@ -43,7 +42,7 @@ def makefile_execution(func):
 
 
 @makefile_execution
-def run_make_with_debug_shell(_: str, targets: Sequence[str]) -> str:
+def run_make_with_debug_shell(_, targets):
     """ Run make and add all executed shell commands to the output """
 
     output = check_output(
@@ -55,7 +54,7 @@ def run_make_with_debug_shell(_: str, targets: Sequence[str]) -> str:
 
 
 @makefile_execution
-def has_make_something_todo(_: str, targets: Sequence[str]) -> bool:
+def has_make_something_todo(_, targets):
     """ Check, if the make command actually does something """
     return call(
         ["make", "--question"] + targets, stderr=DEVNULL, stdout=DEVNULL) != 0
@@ -72,7 +71,7 @@ def english_environment():
     return english
 
 
-def check_makefile(makefile: str):
+def check_makefile(makefile):
     """ Several check, if the given makefile is valid makefile and exists """
     if not isfile(makefile):
         raise FileNotFoundError("No such makefile")

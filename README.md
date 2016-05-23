@@ -7,6 +7,9 @@ Use the logic of a Makefile
 
 ## For developers
 
+## Requirements for development
+* pyvenv (on Ubuntu: sudo apt-get install python3-venv)
+
 ### Internal structure for the executed make commands
 
 #### Step 1: Check, whether the target must be (re)build

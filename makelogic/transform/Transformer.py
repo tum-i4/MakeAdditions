@@ -11,13 +11,13 @@ class TransformerBase(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def can_be_applied_on(cmd: str) -> bool:
+    def can_be_applied_on(cmd):
         """ Check, if this transformation can be applied on cmd """
         return False
 
     @staticmethod
     @abc.abstractmethod
-    def apply_transformation_on(cmd: str, container) -> str:
+    def apply_transformation_on(cmd, container):
         """ Apply transformation on cmd """
         return cmd
 

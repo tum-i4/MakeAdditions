@@ -11,12 +11,12 @@ class TransformCCLink(TransformerLlvm):
     """ transform linker commands """
 
     @staticmethod
-    def can_be_applied_on(cmd: str) -> bool:
+    def can_be_applied_on(cmd):
         return (any(cmd.startswith(s) for s in ["cc", "gcc"]) and
                 " -c " not in cmd)
 
     @staticmethod
-    def apply_transformation_on(cmd: str, container) -> str:
+    def apply_transformation_on(cmd, container):
         # tokenize and remove the original command
         tokens = cmd.split()[1:]
 

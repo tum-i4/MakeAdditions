@@ -5,7 +5,6 @@ Makefile (and a specific target). It can be printed as an .sh-script
 
 import re
 import subprocess
-from typing import Sequence
 from os import linesep
 from .execute import run_make_with_debug_shell
 from .parse import (
@@ -30,7 +29,7 @@ class MakeScript:
         # Set of all used libraries
         self.libs = set({})
 
-    def register(self, cmd: str):
+    def register(self, cmd):
         """ Extract and store informations needed by other commands """
 
         # look for generated libraries
@@ -40,7 +39,7 @@ class MakeScript:
                 self.libs.add(libmatch.group(1) + ".bc")
 
     # pylint: disable=no-self-use
-    def transform(self, cmd: str) -> str:
+    def transform(self, cmd):
         """ Apply transformation to the vanilla command before it is stored """
         return cmd
 
@@ -84,7 +83,7 @@ class MakeScript:
                 # Maybe this shell=True is evil, but what can we do?
                 subprocess.call(cmd, shell=True)
 
-    def append_cmd(self, cmd: str):
+    def append_cmd(self, cmd):
         """ Append a command to the internal command storage """
 
         # register the information of the command
@@ -93,7 +92,7 @@ class MakeScript:
         # and store the transformed command
         self.cmds.append(self.transform(cmd))
 
-    def append_cmdlist(self, cmds: Sequence[str]):
+    def append_cmdlist(self, cmds):
         """
         Append all commands from the sequence in the same order
         to the internal command storage

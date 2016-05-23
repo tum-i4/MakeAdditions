@@ -10,11 +10,11 @@ class TransformAr(TransformerLlvm):
     """ transform ar commands """
 
     @staticmethod
-    def can_be_applied_on(cmd: str) -> bool:
+    def can_be_applied_on(cmd):
         return cmd.startswith("rm -f ")
 
     @staticmethod
-    def apply_transformation_on(cmd: str, container) -> str:
+    def apply_transformation_on(cmd, container):
         # extract a list of files to be deleted
         files = cmd.split()[2:]
 

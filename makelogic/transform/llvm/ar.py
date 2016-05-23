@@ -11,11 +11,11 @@ class TransformAr(TransformerLlvm):
     """ transform ar commands """
 
     @staticmethod
-    def can_be_applied_on(cmd: str) -> bool:
+    def can_be_applied_on(cmd):
         return cmd.startswith("ar cq ") and re.search(r"ar cq \w+\.a", cmd)
 
     @staticmethod
-    def apply_transformation_on(cmd: str, container) -> str:
+    def apply_transformation_on(cmd, container):
         # tokenize and remove the original command with first option
         tokens = cmd.split()[1:]
 

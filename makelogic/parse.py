@@ -4,7 +4,6 @@ Helpful functions for string and command parsing
 
 import os
 import re
-from typing import Sequence
 from .constants import MAKEANNOTATIONHINT
 
 
@@ -18,7 +17,7 @@ class MakefileDirstack():
         # Stack is needed to define, where we are after leaving
         self.dirstack = [os.getcwd()]
 
-    def translate_if_dirannotation(self, cmd: str):
+    def translate_if_dirannotation(self, cmd):
         """
         Transform make directory annotation and leave the rest untouched
         """
@@ -46,26 +45,26 @@ class MakefileDirstack():
         return cmd
 
 
-def is_noop(cmd: str) -> bool:
+def is_noop(cmd):
     """ Checks, if the given command perform no operation, e.g. pure
     comment strings or all sorts of empty strings """
     return not cmd.strip() or cmd.strip().startswith("#")
 
 
-def extract_debugshell(makeoutput: Sequence[str]) -> Sequence[str]:
+def extract_debugshell(makeoutput):
     """ Extract all command invocations from shell debug statements and
     make them to normal commands """
     return [line.lstrip("+ ") for line in makeoutput]
 
 
-def get_relevant_lines(makeoutput: str) -> Sequence[str]:
+def get_relevant_lines(makeoutput):
     """ Remove everything from make output, that is not a makefile annotation
     and shell debug output, but leaves the + sign in front of them """
     return [line for line in makeoutput.splitlines()
             if line.startswith("make") or line.startswith("+")]
 
 
-def translate_to_commands(makeoutput: str) -> Sequence[str]:
+def translate_to_commands(makeoutput):
     """ Translate all the output from make, debug-shell and output of commands
     during make, and translate them to executable commands """
 
@@ -74,7 +73,7 @@ def translate_to_commands(makeoutput: str) -> Sequence[str]:
             get_relevant_lines(makeoutput)))
 
 
-def check_debugshell_and_makefile(makeoutput: str):
+def check_debugshell_and_makefile(makeoutput):
     """
     Check if the Makefile output can be parsed and transformed automatically.
     Raises exceptions, if something looks weird
@@ -88,7 +87,7 @@ def check_debugshell_and_makefile(makeoutput: str):
             "Directory changes cannot be recognized: " + makeoutput[0:35])
 
 
-def translate_makeannotations(makeoutput: Sequence[str])-> Sequence[str]:
+def translate_makeannotations(makeoutput):
     """
     Translate all the annotations of the Makefile-Output to executable commands
     """

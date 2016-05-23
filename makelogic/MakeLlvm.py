@@ -25,7 +25,7 @@ class MakeLlvm(MakeScript):
         # Counter for failed transformations
         self.skipped = 0
 
-    def transform(self, cmd: str):
+    def transform(self, cmd):
         # get all relevant transformations
         relevant = directory.list_all_llvm_transformers()
 
