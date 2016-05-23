@@ -1,3 +1,4 @@
+import os
 import unittest
 from textwrap import dedent
 from makelogic.constants import MAKEANNOTATIONHINT
@@ -39,7 +40,7 @@ class TestTranslateCommands(unittest.TestCase):
             "cc -c -o main.o main.c",
             "cc -c -o divisible.o divisible.c",
             "cc -o divisible main.o divisible.o",
-            "cd /tmp" + MAKEANNOTATIONHINT],
+            "cd " + os.getcwd() + MAKEANNOTATIONHINT],
             translate_to_commands(dedent("""\
             make: Entering directory '/tmp'
             + cc -c -o main.o main.c
@@ -95,15 +96,47 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
 
     def test_two_directory_changes(self):
         self.assertEqual([
-            "cd dir1 # from make",
-            "cd dir2 # from make",
-            "cd dir2 # from make",
-            "cd dir1 # from make"],
+            "cd dir1" + MAKEANNOTATIONHINT,
+            "cmd in dir1",
+            "cd dir2" + MAKEANNOTATIONHINT,
+            "cmd in dir2",
+            "cd dir1" + MAKEANNOTATIONHINT,
+            "cmd in dir1",
+            "cd " + os.getcwd() + MAKEANNOTATIONHINT,
+            "cmd final"],
             translate_makeannotations([
                 "make: Entering directory 'dir1'",
+                "cmd in dir1",
                 "make[1]: Entering directory 'dir2'",
+                "cmd in dir2",
                 "make[1]: Leaving directory 'dir2'",
-                "make: Leaving directory 'dir1'"
+                "cmd in dir1",
+                "make: Leaving directory 'dir1'",
+                "cmd final",
+            ])
+        )
+
+    def test_three_directory_changes(self):
+        self.assertEqual([
+            "cd dir1" + MAKEANNOTATIONHINT,
+            "cd dir1/dir1sub" + MAKEANNOTATIONHINT,
+            "cmd in dir1sub",
+            "cd dir1" + MAKEANNOTATIONHINT,
+            "cmd in dir1",
+            "cd " + os.getcwd() + MAKEANNOTATIONHINT,
+            "cd dir2" + MAKEANNOTATIONHINT,
+            "cmd in dir2",
+            "cd " + os.getcwd() + MAKEANNOTATIONHINT],
+            translate_makeannotations([
+                "make[1]: Entering directory 'dir1'",
+                "make[2]: Entering directory 'dir1/dir1sub'",
+                "cmd in dir1sub",
+                "make[2]: Leaving directory 'dir1/dir1sub'",
+                "cmd in dir1",
+                "make[1]: Leaving directory 'dir1'",
+                "make[1]: Entering directory 'dir2'",
+                "cmd in dir2",
+                "make[1]: Leaving directory 'dir2'",
             ])
         )
 

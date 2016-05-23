@@ -2,8 +2,9 @@
 Helpful functions for string and command parsing
 """
 
-from typing import Sequence
+import os
 import re
+from typing import Sequence
 from .constants import MAKEANNOTATIONHINT
 
 
@@ -15,7 +16,7 @@ class MakefileDirstack():
 
     def __init__(self):
         # Stack is needed to define, where we are after leaving
-        self.dirstack = []
+        self.dirstack = [os.getcwd()]
 
     def translate_if_dirannotation(self, cmd: str):
         """
@@ -38,8 +39,8 @@ class MakefileDirstack():
                 return "cd " + match.group('dir') + MAKEANNOTATIONHINT
 
             elif match.group('action') == 'Leaving':
-                lastdir = self.dirstack.pop()
-                return "cd " + lastdir + MAKEANNOTATIONHINT
+                self.dirstack.pop()
+                return "cd " + self.dirstack[-1] + MAKEANNOTATIONHINT
 
         # return other commands unmodified
         return cmd
