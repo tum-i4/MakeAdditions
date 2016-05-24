@@ -17,6 +17,24 @@ class MakefileDirstack():
         # Stack is needed to define, where we are after leaving
         self.dirstack = [os.getcwd()]
 
+    @staticmethod
+    def cd_command_to(directory):
+        """ Generate a cd command to the given directory """
+        return "cd " + directory + MAKEANNOTATIONHINT
+
+    def push_dir(self, directory):
+        """ Pushes a directory to the stack and return the
+        corresponding entering cd command """
+        self.dirstack.append(directory)
+        return MakefileDirstack.cd_command_to(directory)
+
+    def pop_dir(self, directory):
+        """ Pops a directory from the stack and return a cd command to the
+        upper directory. Asserts, that directory was on top of the stack """
+        check = self.dirstack.pop()
+        assert check == directory
+        return MakefileDirstack.cd_command_to(self.dirstack[-1])
+
     def translate_if_dirannotation(self, cmd):
         """
         Transform make directory annotation and leave the rest untouched
@@ -34,15 +52,16 @@ class MakefileDirstack():
         if match:
 
             if match.group('action') == 'Entering':
-                self.dirstack.append(match.group('dir'))
-                return "cd " + match.group('dir') + MAKEANNOTATIONHINT
+                return self.push_dir(match.group('dir'))
 
             elif match.group('action') == 'Leaving':
-                self.dirstack.pop()
-                return "cd " + self.dirstack[-1] + MAKEANNOTATIONHINT
+                return self.pop_dir(match.group('dir'))
 
         # return other commands unmodified
         return cmd
+
+    def __str__(self):
+        return self.dirstack.__str__()
 
 
 def is_noop(cmd):

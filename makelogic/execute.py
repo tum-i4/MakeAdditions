@@ -1,5 +1,5 @@
 """
-Function for execute commands on the underlying OS
+Functions for executing commands on the underlying OS
 """
 
 from functools import wraps
