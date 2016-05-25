@@ -10,6 +10,7 @@ from sys import stderr
 from .MakeScript import MakeScript
 from .MakeLlvm import MakeLlvm
 from .execute import has_make_something_todo
+from .config import check_config
 
 
 def main():
@@ -49,6 +50,9 @@ def main():
 
     args = parser.parse_args()
     makefile = path.join(getcwd(), "Makefile")
+
+    # Check correct configuration
+    check_config()
 
     if not path.isfile(makefile):
         print("Error: Makefile not found. Tried", makefile, file=stderr)

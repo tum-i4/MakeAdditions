@@ -5,7 +5,7 @@ Functions for executing commands on the underlying OS
 from functools import wraps
 from os.path import dirname, isfile
 from os import chdir, environ, getcwd, sep
-from subprocess import call, check_output, STDOUT, DEVNULL
+from subprocess import call, check_output, STDOUT, DEVNULL, CalledProcessError
 from shlex import quote
 
 
@@ -77,3 +77,42 @@ def check_makefile(makefile):
         raise FileNotFoundError("No such makefile")
     if not makefile.endswith(sep + "Makefile"):
         raise FileNotFoundError("No Makefile given")
+
+
+def check_clang(clang):
+    """ Check if clang is a valid call to a working clang instance """
+
+    check_version_string(
+        clang,
+        "OVERVIEW: clang LLVM compiler",
+        "clang is not working. Please check your config.ini"
+    )
+
+
+def check_llvmlink(llvmlink):
+    """ Check if llvmlink is a valid call to a working llvm-link instance """
+
+    check_version_string(
+        llvmlink,
+        "OVERVIEW: llvm linker",
+        "llvm-link is not working. Please check your config.ini"
+    )
+
+
+def check_version_string(cmd, outputhead, error):
+    """
+    Check, if a call of 'cmd --help' starts with outputhead.
+    If not, an exception with with error message is raised
+    """
+
+    try:
+        output = check_output([cmd, "--help"], env=english_environment())
+    except FileNotFoundError:
+        output = b"command not found"
+    except CalledProcessError as ex:
+        # Some programms return version string and non zero return codes
+        output = ex.output
+
+    # Check the head of the version output
+    if not output.startswith(bytes(outputhead, "utf-8")):
+        raise Exception(error)
