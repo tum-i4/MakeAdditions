@@ -25,10 +25,10 @@ make --print-directory --quiet SHELL="sh -x"
 #### Step 3: Execute selected and transformed commands afterwards
 ```
 # For more details, try:
-make+llvm --dry-run
+make+llvm --just-transform
 ```
 
 ### Run all unit tests
 ```
-python -m unittest
+make test
 ```
