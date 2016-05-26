@@ -1,4 +1,3 @@
-import os
 import unittest
 from textwrap import dedent
 from makelogic.constants import MAKEANNOTATIONHINT
@@ -39,15 +38,15 @@ class TestTranslateCommands(unittest.TestCase):
             "cd /tmp" + MAKEANNOTATIONHINT,
             "cc -c -o main.o main.c",
             "cc -c -o divisible.o divisible.c",
-            "cc -o divisible main.o divisible.o",
-            "cd " + os.getcwd() + MAKEANNOTATIONHINT],
+            "cc -o divisible main.o divisible.o"],
+            # "cd " + os.getcwd() + MAKEANNOTATIONHINT],
             translate_to_commands(dedent("""\
             make: Entering directory '/tmp'
             + cc -c -o main.o main.c
             + cc -c -o divisible.o divisible.c
             + cc -o divisible main.o divisible.o
-            make: Leaving directory '/tmp'
             """))
+            # make: Leaving directory '/tmp'
         )
 
 
@@ -95,48 +94,75 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
         )
 
     def test_two_directory_changes(self):
+        """
+        main
+        ├── Makefile
+        └── sub
+            └── Makefile
+        """
         self.assertEqual([
-            "cd dir1" + MAKEANNOTATIONHINT,
-            "cmd in dir1",
-            "cd dir2" + MAKEANNOTATIONHINT,
-            "cmd in dir2",
-            "cd dir1" + MAKEANNOTATIONHINT,
-            "cmd in dir1",
-            "cd " + os.getcwd() + MAKEANNOTATIONHINT,
-            "cmd final"],
+            "cd /main" + MAKEANNOTATIONHINT,
+            "+ cmd in main",
+            "cd /main/sub" + MAKEANNOTATIONHINT,
+            "+ cmd in sub",
+            "cd /main" + MAKEANNOTATIONHINT,
+            "+ cmd in main"],
+            # "cd " + os.getcwd() + MAKEANNOTATIONHINT],
             translate_makeannotations([
-                "make: Entering directory 'dir1'",
-                "cmd in dir1",
-                "make[1]: Entering directory 'dir2'",
-                "cmd in dir2",
-                "make[1]: Leaving directory 'dir2'",
-                "cmd in dir1",
-                "make: Leaving directory 'dir1'",
-                "cmd final",
+                "make: Entering directory '/main'",
+                "+ cmd in main",
+                "make[1]: Entering directory '/main/sub'",
+                "+ cmd in sub",
+                "make[1]: Leaving directory '/main/sub'",
+                "+ cmd in main",
+                # "make: Leaving directory '/main'",
             ])
         )
 
     def test_three_directory_changes(self):
+        """
+        main
+        ├── Makefile
+        ├── dir1
+        │   ├── Makefile
+        │   └── subdir
+        │       └── Makefile
+        └── dir2
+            └── Makefile
+        """
+
         self.assertEqual([
-            "cd dir1" + MAKEANNOTATIONHINT,
-            "cd dir1/dir1sub" + MAKEANNOTATIONHINT,
-            "cmd in dir1sub",
-            "cd dir1" + MAKEANNOTATIONHINT,
-            "cmd in dir1",
-            "cd " + os.getcwd() + MAKEANNOTATIONHINT,
-            "cd dir2" + MAKEANNOTATIONHINT,
-            "cmd in dir2",
-            "cd " + os.getcwd() + MAKEANNOTATIONHINT],
+            "cd /main" + MAKEANNOTATIONHINT,
+            "+ cmd in main",
+            "cd /main/dir1" + MAKEANNOTATIONHINT,
+            "+ cmd in dir1",
+            "cd /main/dir1/subdir" + MAKEANNOTATIONHINT,
+            "+ cmd in subdir",
+            "cd /main/dir1" + MAKEANNOTATIONHINT,
+            "+ cmd in dir1",
+            "cd /main" + MAKEANNOTATIONHINT,
+            "+ cmd in main",
+            "cd /main/dir2" + MAKEANNOTATIONHINT,
+            "+ cmd in dir2",
+            "cd /main" + MAKEANNOTATIONHINT,
+            "+ cmd in main"],
+            # "cd " + os.getcwd() + MAKEANNOTATIONHINT,]
             translate_makeannotations([
-                "make[1]: Entering directory 'dir1'",
-                "make[2]: Entering directory 'dir1/dir1sub'",
-                "cmd in dir1sub",
-                "make[2]: Leaving directory 'dir1/dir1sub'",
-                "cmd in dir1",
-                "make[1]: Leaving directory 'dir1'",
-                "make[1]: Entering directory 'dir2'",
-                "cmd in dir2",
-                "make[1]: Leaving directory 'dir2'",
+                "make: Entering directory '/main'",
+                "+ cmd in main",
+                "make[1]: Entering directory '/main/dir1'",
+                "+ cmd in dir1",
+                "make[2]: Entering directory '/main/dir1/subdir'",
+                "+ cmd in subdir",
+                "make[2]: Leaving directory '/main/dir1/subdir'",
+                "+ cmd in dir1",
+                "make[1]: Leaving directory '/main/dir1'",
+                "+ cmd in main",
+                "make[1]: Entering directory '/main/dir2'",
+                "+ cmd in dir2",
+                "make[1]: Leaving directory '/main/dir2'",
+                "+ cmd in main",
+                # "make: Leaving directory '/main'",
             ])
         )
 
