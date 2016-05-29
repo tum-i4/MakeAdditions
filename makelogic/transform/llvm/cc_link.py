@@ -2,9 +2,10 @@
 object linker
 """
 
+from os import path
 from ..Transformer import TransformerLlvm
 from ...config import LLVMLINK
-from ...constants import OPTIMIZERFLAGS, EXECFILEEXTENSION
+from ...constants import OPTIMIZERFLAGS, EXECFILEEXTENSION, COMPILERS
 
 
 class TransformCCLink(TransformerLlvm):
@@ -12,8 +13,9 @@ class TransformCCLink(TransformerLlvm):
 
     @staticmethod
     def can_be_applied_on(cmd):
-        return (any(cmd.startswith(s) for s in ["cc", "gcc"]) and
-                " -c " not in cmd)
+        return (
+            any(cmd.startswith(s + " ") for s in COMPILERS) and
+            " -c " not in cmd)
 
     @staticmethod
     def apply_transformation_on(cmd, container):
@@ -26,19 +28,29 @@ class TransformCCLink(TransformerLlvm):
         if "-o" in tokens:
             # append .bc to the output file
             pos = tokens.index("-o")
-            tokens[pos + 1] = tokens[pos + 1] + EXECFILEEXTENSION + ".bc"
+            # add marker for executable files e.i. files that are not .so
+            if ".so" not in tokens[pos + 1]:
+                tokens[pos + 1] += EXECFILEEXTENSION
+            tokens[pos + 1] += ".bc"
 
         # If we compile against a previos compiled library
         if "-L." in tokens:
             # The local library path is no longer needed
             tokens.remove("-L.")
 
-            # replace -l flags, if the library was llvm-compiled earlier
-            tokens = [
-                "lib" + t[2:] + ".a.bc"
-                if (t.startswith("-l") and
-                    "lib" + t[2:] + ".a.bc" in container.libs) else t
-                for t in tokens]
+        # replace -l flags, if the library was llvm-compiled earlier
+        tokens = [
+            "lib" + t[2:] + ".a.bc"
+            if (t.startswith("-l") and
+                "lib" + t[2:] + ".a.bc" in container.libs) else t
+            for t in tokens]
+
+        # replace references to static libraries
+        tokens = [
+            t + ".bc"
+            if (t.endswith(".a") and
+                path.basename(t) + ".bc" in container.libs) else t
+            for t in tokens]
 
         # transform all linked .o-files to the corresponding .bc-file
         tokens = [t[:-2] + ".bc" if t.endswith(".o") else t for t in tokens]

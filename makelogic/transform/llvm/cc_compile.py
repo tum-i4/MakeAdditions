@@ -4,9 +4,12 @@ C compiler
 
 from ..Transformer import TransformerLlvm
 from ...config import CLANG
-from ...constants import OPTIMIZERFLAGS
-
-COMPILERS = ["cc", "gcc", "clang", CLANG]
+from ...constants import (
+    COMPILERS,
+    DEPENDENCYFLAGS,
+    DEPENDENCYEMISSION,
+    OPTIMIZERFLAGS
+)
 
 
 class TransformCCCompile(TransformerLlvm):
@@ -27,6 +30,15 @@ class TransformCCCompile(TransformerLlvm):
 
         # deactivate optimization
         tokens.insert(0, "-O0")
+
+        # remove dependency emission
+        for deptoken in DEPENDENCYEMISSION:
+            if deptoken in tokens:
+                pos = tokens.index(deptoken)
+                del tokens[pos:pos + 2]
+
+        # remove dependency flags
+        tokens = [t for t in tokens if t not in DEPENDENCYFLAGS]
 
         # build the new command
         newcmd = CLANG + " -emit-llvm "

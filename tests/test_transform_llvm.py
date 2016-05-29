@@ -43,12 +43,22 @@ class TestTransformLlvm(unittest.TestCase):
         )
         self.assertEqual(
             CLANG + " -emit-llvm -O0 -DHAVE_CONFIG_H -I. -I../src -g " +
-            "-MT lib.lo -MD -MP -MF .deps/lib.Tpo -c lib.c " +
-            "-fPIC -DPIC -o .libs/lib.bc",
+            "-c lib.c -fPIC -DPIC -o .libs/lib.bc",
             self.llvm.transform(
                 CLANG + " -DHAVE_CONFIG_H -I. -I../src -g " +
                 "-O2  -MT lib.lo -MD -MP -MF .deps/lib.Tpo -c lib.c " +
                 "-fPIC -DPIC -o .libs/lib.o")
+        )
+        self.assertEqual(
+            CLANG + " -emit-llvm -O0 -DHAVE_CONFIG_H -I. " +
+            "'-DLOCALEDIR=" + '"' + "/usr/local/share/locale" + '"' + "'" +
+            "-I../intl -g -c libmain.c -fPIC -DPIC -o .libs/libmain.bc",
+            self.llvm.transform(
+                CLANG + " -DHAVE_CONFIG_H -I. " +
+                "'-DLOCALEDIR=" + '"' + "/usr/local/share/locale" + '"' + "'" +
+                "-I../intl -g -O2 -MT libmain.lo -MD -MP -MF " +
+                ".deps/libmain.Tpo -c libmain.c -fPIC -DPIC -o .libs/libmain.o"
+            )
         )
 
     def test_cc_link(self):
@@ -57,9 +67,10 @@ class TestTransformLlvm(unittest.TestCase):
             self.llvm.transform("cc -o divisible main.o divisible.o")
         )
 
-    def test_cc_link_with_lib(self):
+    def test_cc_link_with_lib_bzip2(self):
         # At first, we register the library
         self.llvm.register("ar cq libbz2.a blocksort.o huffman.o")
+        self.assertTrue("libbz2.a.bc" in self.llvm.libs)
 
         self.assertEqual(
             LLVMLINK + " -o bzip2.x.bc bzip2.bc libbz2.a.bc",
@@ -68,10 +79,46 @@ class TestTransformLlvm(unittest.TestCase):
                 " -o bzip2 bzip2.o -L. -lbz2")
         )
 
+    def test_cc_link_with_lib_flex(self):
+
+        self.llvm.register("ar cru .libs/libcompat.a .libs/lib.o " +
+                           ".libs/reallocarray.o")
+        self.assertTrue("libcompat.a.bc" in self.llvm.libs)
+
+        self.assertEqual(
+            LLVMLINK + " -o stage1flex.x.bc scan.bc buf.bc ccl.bc dfa.bc " +
+            "ecs.bc filter.bc gen.bc main.bc misc.bc nfa.bc options.bc " +
+            "parse.bc regex.bc scanflags.bc scanopt.bc skel.bc sym.bc " +
+            "tables.bc tables_shared.bc tblcmp.bc yylex.bc " +
+            "../lib/.libs/libcompat.a.bc",
+            self.llvm.transform(
+                CLANG + " -g -O2 -o stage1flex scan.o buf.o ccl.o dfa.o " +
+                "ecs.o filter.o gen.o main.o misc.o nfa.o options.o parse.o " +
+                "regex.o scanflags.o scanopt.o skel.o sym.o tables.o " +
+                "tables_shared.o tblcmp.o yylex.o " +
+                "../lib/.libs/libcompat.a -lm")
+        )
+
+    def test_cc_link_shared_flex(self):
+        self.assertEqual(
+            LLVMLINK + " .libs/libmain.bc .libs/libyywrap.bc " +
+            "-o .libs/libfl.so.2.0.0.bc",
+            self.llvm.transform(
+                CLANG + " -shared -fPIC -DPIC .libs/libmain.o " +
+                ".libs/libyywrap.o -lm -g -O2 -Wl,-soname -Wl,libfl.so.2 " +
+                "-o .libs/libfl.so.2.0.0")
+        )
+
     def test_ar(self):
         self.assertEqual(
             LLVMLINK + " -o libbz2.a.bc blocksort.bc huffman.bc",
             self.llvm.transform("ar cq libbz2.a blocksort.o huffman.o")
+        )
+        self.assertEqual(
+            LLVMLINK + " -o .libs/libcompat.a.bc .libs/lib.bc " +
+            ".libs/reallocarray.bc",
+            self.llvm.transform("ar cru .libs/libcompat.a .libs/lib.o " +
+                                ".libs/reallocarray.o")
         )
 
     def test_rm(self):

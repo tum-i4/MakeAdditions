@@ -12,7 +12,8 @@ class TransformAr(TransformerLlvm):
 
     @staticmethod
     def can_be_applied_on(cmd):
-        return cmd.startswith("ar cq ") and re.search(r"ar cq \w+\.a", cmd)
+        return (cmd.startswith("ar ") and
+                re.search(r"ar [cruq]+ [^ ]+\.a", cmd))
 
     @staticmethod
     def apply_transformation_on(cmd, container):
@@ -22,7 +23,7 @@ class TransformAr(TransformerLlvm):
         # llvm needs a flag for specifying the output file
         tokens[0] = "-o"
 
-        # Add .bc file extension to static archive
+        # Add .bc file extension to static archive -> libxxx.a.bc
         tokens[1] += ".bc"
 
         # transform all linked .o-files to the corresponding .bc-file

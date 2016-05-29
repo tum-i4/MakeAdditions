@@ -5,7 +5,7 @@ Makefile (and a specific target). It can be printed as an .sh-script
 
 import re
 import subprocess
-from os import linesep
+from os import linesep, path
 from .execute import run_make_with_debug_shell
 from .parse import (
     check_debugshell_and_makefile,
@@ -33,10 +33,10 @@ class MakeScript:
         """ Extract and store informations needed by other commands """
 
         # look for generated libraries
-        if cmd.startswith("ar cq "):
-            libmatch = re.search(r"ar cq (\w+.a)", cmd)
+        if cmd.startswith("ar "):
+            libmatch = re.search(r"ar [cruq]+ ([^ ]+\.a)", cmd)
             if libmatch:
-                self.libs.add(libmatch.group(1) + ".bc")
+                self.libs.add(path.basename(libmatch.group(1)) + ".bc")
 
     # pylint: disable=no-self-use
     def transform(self, cmd):
@@ -78,10 +78,26 @@ class MakeScript:
         Execute all the transformed commands.
         Hopefully this results in a full llvm-build
         """
-        for cmd in self.cmds:
-            if not is_noop(cmd):
-                # Maybe this shell=True is evil, but what can we do?
-                subprocess.call(cmd, shell=True)
+
+        # filter all noop commands
+        cmds = (cmd for cmd in self.cmds if not is_noop(cmd))
+
+        # Variables to track directory changes
+        curdir = "/dev/null"
+
+        for cmd in cmds:
+            if cmd.startswith("cd "):
+                # we need a special logic for cd in the subprocesses
+                curdir = cmd[3:].split("#")[0].strip()
+            else:
+                # Other commands are executed in a seperate subprocess
+
+                # I know, this shell=True can be evil, but what can we do?
+                code = subprocess.call(cmd, shell=True, cwd=curdir)
+
+                # Stop on the first error
+                if code != 0:
+                    raise OSError("Execution failed for '%s'" % cmd)
 
     def append_cmd(self, cmd):
         """ Append a command to the internal command storage """
