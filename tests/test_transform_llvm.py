@@ -1,7 +1,7 @@
 import unittest
 from makelogic.MakeLlvm import MakeLlvm
 from makelogic.config import CLANG, LLVMLINK
-from makelogic.constants import MAKEANNOTATIONHINT
+from makelogic.constants import EXECFILEEXTENSION, MAKEANNOTATIONHINT
 
 
 class TestTransformLlvm(unittest.TestCase):
@@ -63,7 +63,8 @@ class TestTransformLlvm(unittest.TestCase):
 
     def test_cc_link(self):
         self.assertEqual(
-            LLVMLINK + " -o divisible.x.bc main.bc divisible.bc",
+            LLVMLINK + " -o divisible" + EXECFILEEXTENSION +
+            ".bc main.bc divisible.bc",
             self.llvm.transform("cc -o divisible main.o divisible.o")
         )
 
@@ -73,7 +74,8 @@ class TestTransformLlvm(unittest.TestCase):
         self.assertTrue("libbz2.a.bc" in self.llvm.libs)
 
         self.assertEqual(
-            LLVMLINK + " -o bzip2.x.bc bzip2.bc libbz2.a.bc",
+            LLVMLINK + " -o bzip2" + EXECFILEEXTENSION +
+            ".bc bzip2.bc libbz2.a.bc",
             self.llvm.transform(
                 "gcc -Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64 "
                 " -o bzip2 bzip2.o -L. -lbz2")
@@ -86,10 +88,10 @@ class TestTransformLlvm(unittest.TestCase):
         self.assertTrue("libcompat.a.bc" in self.llvm.libs)
 
         self.assertEqual(
-            LLVMLINK + " -o stage1flex.x.bc scan.bc buf.bc ccl.bc dfa.bc " +
-            "ecs.bc filter.bc gen.bc main.bc misc.bc nfa.bc options.bc " +
-            "parse.bc regex.bc scanflags.bc scanopt.bc skel.bc sym.bc " +
-            "tables.bc tables_shared.bc tblcmp.bc yylex.bc " +
+            LLVMLINK + " -o stage1flex" + EXECFILEEXTENSION + ".bc scan.bc" +
+            " buf.bc ccl.bc dfa.bc ecs.bc filter.bc gen.bc main.bc misc.bc " +
+            "nfa.bc options.bc parse.bc regex.bc scanflags.bc scanopt.bc " +
+            "skel.bc sym.bc tables.bc tables_shared.bc tblcmp.bc yylex.bc " +
             "../lib/.libs/libcompat.a.bc",
             self.llvm.transform(
                 CLANG + " -g -O2 -o stage1flex scan.o buf.o ccl.o dfa.o " +
@@ -114,8 +116,8 @@ class TestTransformLlvm(unittest.TestCase):
         self.llvm.register("ar cr lib/libcoreutils.a lib/copy-acl.o")
 
         self.assertEqual(
-            LLVMLINK + " -o src/chroot.x.bc src/chroot.bc src/libver.a.bc " +
-            "lib/libcoreutils.a.bc",
+            LLVMLINK + " -o src/chroot" + EXECFILEEXTENSION +
+            ".bc src/chroot.bc src/libver.a.bc lib/libcoreutils.a.bc",
             self.llvm.transform(
                 CLANG + " -g -O2 -Wl,--as-needed -o src/chroot src/chroot.o " +
                 "src/libver.a lib/libcoreutils.a lib/libcoreutils.a")
@@ -143,7 +145,7 @@ class TestTransformLlvm(unittest.TestCase):
             self.llvm.transform("rm -f lib.a"))
 
         self.assertEqual(
-            "rm -f executable.x.bc",
+            "rm -f executable" + EXECFILEEXTENSION + ".bc",
             self.llvm.transform("rm -f executable"))
 
         self.assertEqual("", self.llvm.transform("rm -f notrelevant.sh"))
@@ -155,7 +157,8 @@ class TestTransformLlvm(unittest.TestCase):
             self.llvm.transform("rm -f '*.o'"))
 
         self.assertEqual(
-            "rm -f '*.bc' libbz2.a.bc bzip2.x.bc bzip2recover.x.bc",
+            "rm -f '*.bc' libbz2.a.bc bzip2" + EXECFILEEXTENSION +
+            ".bc bzip2recover" + EXECFILEEXTENSION + ".bc",
             self.llvm.transform(
                 "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2")
         )
