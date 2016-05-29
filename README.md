@@ -1,6 +1,6 @@
-# MakeLogic
+# MakeAdditions
 
-Use the logic of a Makefile
+Adds magic to your make command.
 
 ## Requirements
 * Python >= 3.4

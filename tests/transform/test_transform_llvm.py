@@ -1,5 +1,5 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
+from makeadditions.MakeLlvm import MakeLlvm
 
 
 class TestTransformLlvm(unittest.TestCase):

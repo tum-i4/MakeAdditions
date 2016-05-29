@@ -1,7 +1,7 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
-from makelogic.config import CLANG, LLVMLINK
-from makelogic.constants import EXECFILEEXTENSION
+from makeadditions.MakeLlvm import MakeLlvm
+from makeadditions.config import CLANG, LLVMLINK
+from makeadditions.constants import EXECFILEEXTENSION
 
 
 class TestTransformLlvmCCLink(unittest.TestCase):

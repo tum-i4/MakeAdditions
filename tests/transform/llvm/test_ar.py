@@ -1,6 +1,6 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
-from makelogic.config import LLVMLINK
+from makeadditions.MakeLlvm import MakeLlvm
+from makeadditions.config import LLVMLINK
 
 
 class TestTransformLlvmAr(unittest.TestCase):

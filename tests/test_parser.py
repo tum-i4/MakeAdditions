@@ -1,7 +1,7 @@
 import unittest
 from textwrap import dedent
-from makelogic.constants import MAKEANNOTATIONHINT
-from makelogic.parse import (
+from makeadditions.constants import MAKEANNOTATIONHINT
+from makeadditions.parse import (
     check_debugshell_and_makefile,
     extract_debugshell,
     get_relevant_lines,

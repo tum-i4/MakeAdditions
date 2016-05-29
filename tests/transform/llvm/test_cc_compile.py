@@ -1,6 +1,6 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
-from makelogic.config import CLANG
+from makeadditions.MakeLlvm import MakeLlvm
+from makeadditions.config import CLANG
 
 
 class TestTransformLlvmCCCompile(unittest.TestCase):

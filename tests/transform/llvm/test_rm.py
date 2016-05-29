@@ -1,6 +1,6 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
-from makelogic.constants import EXECFILEEXTENSION
+from makeadditions.MakeLlvm import MakeLlvm
+from makeadditions.constants import EXECFILEEXTENSION
 
 
 class TestTransformLlvmRm(unittest.TestCase):

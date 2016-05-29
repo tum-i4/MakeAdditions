@@ -1,5 +1,5 @@
 import unittest
-from makelogic.execute import check_clang, check_llvmlink
+from makeadditions.execute import check_clang, check_llvmlink
 
 
 class TestCheckClang(unittest.TestCase):

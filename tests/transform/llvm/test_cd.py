@@ -1,6 +1,6 @@
 import unittest
-from makelogic.MakeLlvm import MakeLlvm
-from makelogic.constants import MAKEANNOTATIONHINT
+from makeadditions.MakeLlvm import MakeLlvm
+from makeadditions.constants import MAKEANNOTATIONHINT
 
 
 class TestTransformLlvmCd(unittest.TestCase):
