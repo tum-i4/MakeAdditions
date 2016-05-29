@@ -2,6 +2,7 @@
 rm - remove files or directories
 """
 
+from os import path
 from ..Transformer import TransformerLlvm
 from ...constants import EXECFILEEXTENSION
 
@@ -30,10 +31,13 @@ class TransformAr(TransformerLlvm):
                 file = file[1:-1]
                 embrace = '"'
 
-            if file.endswith(".o") or file.endswith(".a"):
-                # simply append .bc to normal compiled files
+            if file.endswith(".o"):
+                # Use .bc files instead of .o files
+                new.append(embrace + file[:-2] + ".bc" + embrace)
+            elif file.endswith(".a") or ".so" in file:
+                # simply append .bc to normal linked files
                 new.append(embrace + file + ".bc" + embrace)
-            elif '.' not in file:
+            elif '.' not in path.basename(file):
                 # add .x.bc to executables
                 new.append(
                     embrace + file + EXECFILEEXTENSION + ".bc" + embrace)

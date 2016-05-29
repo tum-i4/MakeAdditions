@@ -123,7 +123,7 @@ class TestTransformLlvm(unittest.TestCase):
 
     def test_rm(self):
         self.assertEqual(
-            "rm -f main.o.bc",
+            "rm -f main.bc",
             self.llvm.transform("rm -f main.o"))
 
         self.assertEqual(
@@ -136,8 +136,14 @@ class TestTransformLlvm(unittest.TestCase):
 
         self.assertEqual("", self.llvm.transform("rm -f notrelevant.sh"))
 
-        self.assertEqual("rm -f *.o.bc", self.llvm.transform("rm -f *.o"))
+        self.assertEqual("rm -f *.bc", self.llvm.transform("rm -f *.o"))
 
         self.assertEqual(
-            "rm -f '*.o.bc'",
+            "rm -f '*.bc'",
             self.llvm.transform("rm -f '*.o'"))
+
+        self.assertEqual(
+            "rm -f '*.bc' libbz2.a.bc bzip2.x.bc bzip2recover.x.bc",
+            self.llvm.transform(
+                "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2")
+        )
