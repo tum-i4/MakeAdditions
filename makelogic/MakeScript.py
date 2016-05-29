@@ -6,6 +6,7 @@ Makefile (and a specific target). It can be printed as an .sh-script
 import re
 import subprocess
 from os import linesep, path
+from sys import stderr
 from .execute import run_make_with_debug_shell
 from .parse import (
     check_debugshell_and_makefile,
@@ -97,7 +98,8 @@ class MakeScript:
 
                 # Stop on the first error
                 if code != 0:
-                    raise OSError("Execution failed for '%s'" % cmd)
+                    print("Execution failed for '%s'" % cmd, file=stderr)
+                    # raise OSError("Execution failed for '%s'" % cmd)
 
     def append_cmd(self, cmd):
         """ Append a command to the internal command storage """

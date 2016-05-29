@@ -6,6 +6,7 @@ from os import path
 from ..Transformer import TransformerLlvm
 from ...config import LLVMLINK
 from ...constants import OPTIMIZERFLAGS, EXECFILEEXTENSION, COMPILERS
+from ...helper import no_duplicates
 
 
 class TransformCCLink(TransformerLlvm):
@@ -58,4 +59,4 @@ class TransformCCLink(TransformerLlvm):
         # filter all command line options except -o
         tokens = [t for t in tokens if not t.startswith("-") or t == "-o"]
 
-        return LLVMLINK + " " + " ".join(tokens)
+        return LLVMLINK + " " + " ".join(no_duplicates(tokens))

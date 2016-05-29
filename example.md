@@ -13,12 +13,8 @@ make+llvm
 ```
 
 ```
-/home/huto/build/llvm/Release/bin/lli bzip2.x.bc --version
+lli bzip2.x.bc --version
 ```
-
----------------
-# Everything above is working
-
 
 ## flex
 
@@ -26,9 +22,26 @@ make+llvm
 git clone --depth 1 --branch v2.6.1 https://github.com/westes/flex.git
 cd flex
 ./autogen.sh
-./configure CC=/home/huto/build/llvm/Release/bin/clang
+./configure CC=clang
 make+llvm
 ```
+
+```
+lli ./src/flex.x.bc --version
+```
+
+## coreutils
+```
+git clone --branch v8.25 http://git.savannah.gnu.org/r/coreutils.git
+cd coreutils
+./bootstrap
+./configure CC=clang
+make+llvm
+```
+
+---------------
+# Everything above is working
+
 
 ## grep
 
@@ -58,6 +71,8 @@ grep.c:540:35: note: expanded from macro 'CAST_ALIGNED'
 
 ## wget
 
+% depends on gnulib
+
 ```
 git clone --branch v1.17.1 http://git.savannah.gnu.org/r/wget.git
 cd wget
@@ -71,14 +86,6 @@ cd wget
 git clone --depth 1 --branch rel-23 https://github.com/ngircd/ngircd.git
 cd ngircd
 ./autogen.sh
-./configure CC=/home/huto/build/llvm/Release/bin/clang
-```
-
-## coreutils
-```
-git clone --branch v8.25 http://git.savannah.gnu.org/r/coreutils.git
-cd coreutils
-./bootstrap
 ./configure CC=/home/huto/build/llvm/Release/bin/clang
 ```
 

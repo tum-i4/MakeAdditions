@@ -109,6 +109,18 @@ class TestTransformLlvm(unittest.TestCase):
                 "-o .libs/libfl.so.2.0.0")
         )
 
+    def test_cc_link_double_coreutils(self):
+        self.llvm.register("ar cr src/libver.a src/version.o")
+        self.llvm.register("ar cr lib/libcoreutils.a lib/copy-acl.o")
+
+        self.assertEqual(
+            LLVMLINK + " -o src/chroot.x.bc src/chroot.bc src/libver.a.bc " +
+            "lib/libcoreutils.a.bc",
+            self.llvm.transform(
+                CLANG + " -g -O2 -Wl,--as-needed -o src/chroot src/chroot.o " +
+                "src/libver.a lib/libcoreutils.a lib/libcoreutils.a")
+        )
+
     def test_ar(self):
         self.assertEqual(
             LLVMLINK + " -o libbz2.a.bc blocksort.bc huffman.bc",
