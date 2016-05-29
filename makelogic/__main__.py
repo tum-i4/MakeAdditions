@@ -47,6 +47,15 @@ def main():
              "filter or execute them in any way. They are printed afterwards",
         action="store_true",
     )
+    parser.add_argument(
+        "--keep-going",
+        dest="keep_going",
+        help="Normally the llvm-build command chain stops, if a single "
+             "command fails. With this flag, the error is reported, but all "
+             "further commands are executed. Thereby this may report a ton "
+             "of errors",
+        action="store_true",
+    )
 
     args = parser.parse_args()
     makefile = path.join(getcwd(), "Makefile")
@@ -72,7 +81,7 @@ def main():
         if not args.just_transform:
             # Execute all the captured and transformed commands
             print("Run transformed make commands ...")
-            llvm.execute_cmds()
+            llvm.execute_cmds(args.keep_going)
             print(" ... done")
         else:
             # Output instead of execution for just transform

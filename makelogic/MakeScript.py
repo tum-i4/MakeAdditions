@@ -74,7 +74,7 @@ class MakeScript:
         """ Print the stored command as a sh-script """
         return linesep.join(self.cmds)
 
-    def execute_cmds(self):
+    def execute_cmds(self, keep_going=False):
         """
         Execute all the transformed commands.
         Hopefully this results in a full llvm-build
@@ -98,8 +98,10 @@ class MakeScript:
 
                 # Stop on the first error
                 if code != 0:
-                    print("Execution failed for '%s'" % cmd, file=stderr)
-                    # raise OSError("Execution failed for '%s'" % cmd)
+                    if keep_going:
+                        print("Execution failed for '%s'" % cmd, file=stderr)
+                    else:
+                        raise OSError("Execution failed for '%s'" % cmd)
 
     def append_cmd(self, cmd):
         """ Append a command to the internal command storage """

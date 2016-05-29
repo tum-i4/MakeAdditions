@@ -36,7 +36,7 @@ git clone --branch v8.25 http://git.savannah.gnu.org/r/coreutils.git
 cd coreutils
 ./bootstrap
 ./configure CC=clang
-make+llvm
+make+llvm --keep-going
 ```
 
 ---------------
