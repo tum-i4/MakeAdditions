@@ -14,7 +14,7 @@ class MakeLlvm(MakeScript):
 
     """
     The .sh-script representation of the commands from a Makefile target
-    converted to the logic for generating llvm-bytecode
+    converted to the logic for generating llvm-bitcode
     """
 
     __NOTRANSFORMATIONCOMMENT = " # Sorry, no transformation found"

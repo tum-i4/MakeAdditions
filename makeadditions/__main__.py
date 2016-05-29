@@ -23,7 +23,7 @@ def main():
         description="""\
         Execute a normal make command for the given target and record all
         commands invoked during the build process. This commands are filtered
-        and transformed to emit llvm-bytecode for all compiler commands. These
+        and transformed to emit llvm-bitcode for all compiler commands. These
         commands form a second build process, that is executed afterwards.
         """
     )
