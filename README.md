@@ -100,6 +100,15 @@ llvm-link is missing this feature. The only known workaround is to use `make+llv
 
 This project uses a makefile for the most common tasks. Simply run `make` in the main directory in order to get a list of all commands. If you want to submit pull requests, please make sure, that `make test` still works and `pylint makeadditions` reports no errors.
 
+### Getting started
+For the lazy people: these commands are a good starting point.
+
+```
+make dev
+source .venv/bin/activate
+make+llvm -h
+```
+
 ### How to add own transformation
 
 * **Step 1**: Try to isolate the command [see Main landmarks for details](#main-landmarks-during the-make-process-with-additions)
