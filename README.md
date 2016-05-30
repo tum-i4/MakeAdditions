@@ -1,12 +1,12 @@
 # MakeAdditions
 
-Add magic to your make command.
+*Add magic to your make command.*
 
 This is a python package, that encapsulate calls to make and thereby generate additional deliverables. For example it can generate llvm bitcode equivalents for all generated binaries. Most import, you do not have to change any file for this - no code, no make rule, nothing.
 
 Nearly all unix programs share the same process: `./configure, make, make install`. I just slightly adopted this process and leave the rest to this python package. All you need is `./configure CC=clang, make+llvm`
 
-I came up with the idea for this project during some experiments with [symbolic program execution](https://en.wikipedia.org/wiki/Symbolic_execution) and automatic error detection. I want to try [KLEE](https://klee.github.io/) on different projects, but I find it pretty hard and ugly to emit llvm bitcode for programs older than llvm itself. Even the [official tutorial for testing coreutils](https://klee.github.io/tutorials/testing-coreutils/) don't work with my LLVM 3.4.
+I came up with the idea for this project during some experiments with [symbolic program execution](https://en.wikipedia.org/wiki/Symbolic_execution) and automatic error detection. I want to try [KLEE](https://klee.github.io/) on different projects, but I find it pretty hard and ugly to emit llvm bitcode for programs older than llvm itself. Even the [official tutorial for testing coreutils](https://klee.github.io/tutorials/testing-coreutils/) doesn't work with my LLVM 3.4.
 
 I am aware of the complexity within the make process and even worse, the possibilities of the shell, but I hope this project can be extended easily enough to new, unseen makefiles. Nevertheless, every command can be displayed and executed by hand, if all automation fails.
 
@@ -21,9 +21,9 @@ Finally, if you are a developer - or at least, you want to modify this package -
 
 ## make+llvm: Compile your project as llvm bitcode
 
-Warning: Please keep in mind, that `make+llvm` includes a casual run of `make`. Therefore just simply replace all your calls to `make ...` with `make+llvm ...` and everything works fine, even `make+llvm clean`
+Warning: Please keep in mind, that `make+llvm` includes a casual run of `make`. Therefore, just simply replace all your calls to `make ...` with `make+llvm ...` and everything works fine, even `make+llvm clean`
 
-`make+llvm` generates additional llvm-bitcode versions of all files, that are compiled and/or linked during the the normal build process with `make`. In more details, you get the following files in the same directory additional to the normal make target deliverables.
+`make+llvm` generates additional llvm-bitcode versions of all files, that are compiled and/or linked during the normal build process with `make`. In more details, you get the following files in the same directory additional to the normal make target deliverables.
 
 ```
 *.o           -> *.bc
@@ -34,7 +34,7 @@ executable    -> executable.x.bc
 
 ## Main landmarks during the make process with additions
 
-MakeAdditions aims to be very close to the normal semantics of make, e.i have very minimalistic commands (`make+llvm <target>`) and only rebuild, what was changed earlier. Nevertheless thousands of commands are executed in the background and only one erroneous call can stop the whole compilation process. When digging for errors, remember this basic main commands, that are hidden in the internals of make+llvm.
+MakeAdditions aims to be very close to the normal semantics of make, e.i have very minimalistic commands (`make+llvm <target>`) and only rebuild, what was changed earlier. Nevertheless, thousands of commands are executed in the background and only one erroneous call can stop the whole compilation process. When digging for errors, remember this basic main commands, that are hidden in the internals of make+llvm.
 
 ### Step 0: Before doing anything: is make really working?
 ```
@@ -115,4 +115,4 @@ make+llvm -h
 * **Step 2**: Add a new test case to `tests/transform/ADDITION/test_COMMAND.py`
 * **Step 3**: Change the corresponding `makeadditions/transform/ADDITION/COMMAND.py` till all tests pass
 
-If you want to transform a new kind command, just create a new files in the corresponding directories. The transformation is registered automatically, as long as the new transformer class inherit from the `TransformerLlvm` class. Thereby you normally don't have to change any other file than the two mentioned above. The `cd` transformer is a good point to start.
+If you want to transform a new kind command, just create new files in the corresponding directories. The transformation is registered automatically, as long as the new transformer class inherit from the `TransformerLlvm` class. Thereby you normally don't have to change any other file than the two mentioned above. The `cd` transformer is a good point to start.
