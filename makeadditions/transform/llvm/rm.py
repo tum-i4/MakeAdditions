@@ -31,6 +31,10 @@ class TransformAr(TransformerLlvm):
                 file = file[1:-1]
                 embrace = '"'
 
+            # No embracing for wildcard commands
+            if '*' in file:
+                embrace = ""
+
             if file.endswith(".o"):
                 # Use .bc files instead of .o files
                 new.append(embrace + file[:-2] + ".bc" + embrace)

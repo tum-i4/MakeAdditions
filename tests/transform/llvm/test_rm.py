@@ -33,11 +33,11 @@ class TestTransformLlvmRm(unittest.TestCase):
         self.assertEqual("rm -f *.bc", self.llvm.transform("rm -f *.o"))
 
     def test_rm_wildcard_enquoted(self):
-        self.assertEqual("rm -f '*.bc'", self.llvm.transform("rm -f '*.o'"))
+        self.assertEqual("rm -f *.bc", self.llvm.transform("rm -f '*.o'"))
 
     def test_rm_mixed_bzip2(self):
         self.assertEqual(
-            "rm -f '*.bc' libbz2.a.bc bzip2" + EXECFILEEXTENSION +
+            "rm -f *.bc libbz2.a.bc bzip2" + EXECFILEEXTENSION +
             ".bc bzip2recover" + EXECFILEEXTENSION + ".bc",
             self.llvm.transform(
                 "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2")

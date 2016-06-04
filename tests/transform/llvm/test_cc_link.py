@@ -70,3 +70,22 @@ class TestTransformLlvmCCLink(unittest.TestCase):
                 CLANG + " -g -O2 -Wl,--as-needed -o src/chroot src/chroot.o " +
                 "src/libver.a lib/libcoreutils.a lib/libcoreutils.a")
         )
+
+    def test_cc_link_ngircd(self):
+        self.llvm.register("ar cru libngportab.a strdup.o")
+        self.llvm.register("ar cru libngtool.a tool.o")
+        self.llvm.register("ar cru libngipaddr.a ng_ipaddr.o")
+
+        self.assertEqual(
+            LLVMLINK + " -o ngircd.x.bc ngircd.bc array.bc channel.bc " +
+            "class.bc client.bc client-cap.bc conf.bc conn.bc " +
+            "libngportab.a.bc libngtool.a.bc libngipaddr.a.bc",
+            self.llvm.transform(
+                CLANG + " -g -O2 -pipe -W -Wall -Wpointer-arith " +
+                "-Wstrict-prototypes -fstack-protector '-DSYSCONFDIR=" + '"' +
+                "/usr/local/etc" + '"' + "' '-DDOCDIR=" + '"' +
+                "/usr/local/share/doc/ngircd" + '"' + "' -L../portab " +
+                "-L../tool -L../ipaddr -o ngircd ngircd.o array.o channel.o " +
+                "class.o client.o client-cap.o conf.o conn.o " +
+                "-lngportab -lngtool -lngipaddr -lz")
+        )

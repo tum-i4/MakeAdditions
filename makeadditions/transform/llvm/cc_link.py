@@ -57,6 +57,8 @@ class TransformCCLink(TransformerLlvm):
         tokens = [t[:-2] + ".bc" if t.endswith(".o") else t for t in tokens]
 
         # filter all command line options except -o
-        tokens = [t for t in tokens if not t.startswith("-") or t == "-o"]
+        flagstarts = ["-", "'-", '"-']
+        tokens = [t for t in tokens if not (
+            any(t.startswith(start) for start in flagstarts)) or t == "-o"]
 
         return LLVMLINK + " " + " ".join(no_duplicates(tokens))
