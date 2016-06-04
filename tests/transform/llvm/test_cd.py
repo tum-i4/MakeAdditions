@@ -1,18 +1,12 @@
-import unittest
+from ..TransformationTestCase import TransformationTestCase
 from makeadditions.Command import Command
-from makeadditions.MakeLlvm import MakeLlvm
 from makeadditions.constants import MAKEANNOTATIONHINT
 
 
-class TestTransformLlvmCd(unittest.TestCase):
-
-    def setUp(self):
-        self.llvm = MakeLlvm()
+class TestTransformLlvmCd(TransformationTestCase):
 
     def test_cd_remove_shell(self):
-        self.assertEqual(
-            Command("", "/tmp"),
-            self.llvm.transform(Command("cd mydir", "/tmp")))
+        self.assertTransformation("", "cd mydir")
 
     def test_cd_keep_make(self):
         self.assertEqual(

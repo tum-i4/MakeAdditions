@@ -1,53 +1,35 @@
-import unittest
-from makeadditions.Command import Command
-from makeadditions.MakeLlvm import MakeLlvm
+from ..TransformationTestCase import TransformationTestCase
 from makeadditions.constants import EXECFILEEXTENSION
 
 
-class TestTransformLlvmRm(unittest.TestCase):
-
-    def setUp(self):
-        self.llvm = MakeLlvm()
+class TestTransformLlvmRm(TransformationTestCase):
 
     def test_rm_single_object_file(self):
-        self.assertEqual(
-            Command("rm -f main.bc", "/tmp"),
-            self.llvm.transform(Command("rm -f main.o", "/tmp")))
+        self.assertTransformation("rm -f main.bc", "rm -f main.o")
 
     def test_rm_single_static_library(self):
-        self.assertEqual(
-            Command("rm -f lib.a.bc", "/tmp"),
-            self.llvm.transform(Command("rm -f lib.a", "/tmp")))
+        self.assertTransformation("rm -f lib.a.bc", "rm -f lib.a")
 
     def test_rm_single_executable(self):
-        self.assertEqual(
-            Command("rm -f executable" + EXECFILEEXTENSION + ".bc", "/tmp"),
-            self.llvm.transform(Command("rm -f executable", "/tmp")))
+        self.assertTransformation(
+            "rm -f executable" + EXECFILEEXTENSION + ".bc",
+            "rm -f executable")
 
     def test_no_rm_for_single_irrelevant(self):
-        self.assertEqual(
-            Command("", "/tmp"),
-            self.llvm.transform(Command("rm -f notrelevant.sh", "/tmp")))
+        self.assertTransformation("", "rm -f notrelevant.sh")
 
     def test_no_rm_for_two_irrelevant(self):
-        self.assertEqual(
-            Command("", "/tmp"),
-            self.llvm.transform(Command("rm -f one.sh two.sh", "/tmp")))
+        self.assertTransformation("", "rm -f one.sh two.sh")
 
     def test_rm_wildcard_object(self):
-        self.assertEqual(
-            Command("rm -f *.bc", "/tmp"),
-            self.llvm.transform(Command("rm -f *.o", "/tmp")))
+        self.assertTransformation("rm -f *.bc", "rm -f *.o")
 
     def test_rm_wildcard_enquoted(self):
-        self.assertEqual(
-            Command("rm -f *.bc", "/tmp"),
-            self.llvm.transform(Command("rm -f '*.o'", "/tmp")))
+        self.assertTransformation("rm -f *.bc", "rm -f '*.o'")
 
     def test_rm_mixed_bzip2(self):
-        self.assertEqual(
-            Command("rm -f *.bc libbz2.a.bc bzip2" + EXECFILEEXTENSION +
-                    ".bc bzip2recover" + EXECFILEEXTENSION + ".bc", "/tmp"),
-            self.llvm.transform(Command(
-                "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2", "/tmp"))
+        self.assertTransformation(
+            "rm -f *.bc libbz2.a.bc bzip2" + EXECFILEEXTENSION +
+            ".bc bzip2recover" + EXECFILEEXTENSION + ".bc",
+            "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2"
         )
