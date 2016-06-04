@@ -4,13 +4,11 @@ Makefile (and a specific target). It can be printed as an .sh-script
 """
 
 import re
-import subprocess
 from os import linesep, path
 from sys import stderr
 from .execute import run_make_with_debug_shell
 from .parse import (
     check_debugshell_and_makefile,
-    is_noop,
     translate_to_commands
 )
 
@@ -27,17 +25,19 @@ class MakeScript:
         # List for all commands
         self.cmds = []
 
-        # Set of all used libraries
-        self.libs = set({})
+        # Dictionary of all generated libraries
+        self.libs = dict()
 
     def register(self, cmd):
         """ Extract and store informations needed by other commands """
 
         # look for generated libraries
-        if cmd.startswith("ar "):
-            libmatch = re.search(r"ar [cruq]+ ([^ ]+\.a)", cmd)
+        if cmd.bashcmd.startswith("ar "):
+            libmatch = re.search(
+                r"ar [cruq]+ ([^ ]*lib([^ ]+)\.a)", cmd.bashcmd)
             if libmatch:
-                self.libs.add(path.basename(libmatch.group(1)) + ".bc")
+                self.libs["lib" + libmatch.group(2)] = (
+                    path.join(cmd.curdir, libmatch.group(1) + ".bc"))
 
     # pylint: disable=no-self-use
     def transform(self, cmd):
@@ -72,7 +72,7 @@ class MakeScript:
 
     def __str__(self):
         """ Print the stored command as a sh-script """
-        return linesep.join(self.cmds)
+        return linesep.join([str(cmd) for cmd in self.cmds])
 
     def execute_cmds(self, keep_going=False):
         """
@@ -80,28 +80,19 @@ class MakeScript:
         Hopefully this results in a full llvm-build
         """
 
-        # filter all noop commands
-        cmds = (cmd for cmd in self.cmds if not is_noop(cmd))
+        # filter all commands with no effects
+        cmds = (cmd for cmd in self.cmds if cmd.has_effects())
 
-        # Variables to track directory changes
-        curdir = "/dev/null"
+        for cmd in list(cmds):
+            # Execute the commands
+            code = cmd.execute()
 
-        for cmd in cmds:
-            if cmd.startswith("cd "):
-                # we need a special logic for cd in the subprocesses
-                curdir = cmd[3:].split("#")[0].strip()
-            else:
-                # Other commands are executed in a seperate subprocess
-
-                # I know, this shell=True can be evil, but what can we do?
-                code = subprocess.call(cmd, shell=True, cwd=curdir)
-
-                # Stop on the first error
-                if code != 0:
-                    if keep_going:
-                        print("Execution failed for '%s'" % cmd, file=stderr)
-                    else:
-                        raise OSError("Execution failed for '%s'" % cmd)
+            # Stop on the first error
+            if code != 0:
+                if keep_going:
+                    print("Execution failed for '%s'" % cmd, file=stderr)
+                else:
+                    raise OSError("Execution failed for '%s'" % cmd)
 
     def append_cmd(self, cmd):
         """ Append a command to the internal command storage """

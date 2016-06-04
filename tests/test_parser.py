@@ -1,11 +1,14 @@
 import unittest
 from textwrap import dedent
+from makeadditions.Command import Command
 from makeadditions.constants import MAKEANNOTATIONHINT
 from makeadditions.parse import (
     check_debugshell_and_makefile,
+    encapsulate_commands,
     extract_debugshell,
+    extract_dir_from_makecd,
     get_relevant_lines,
-    is_noop,
+    is_make_cd_cmd,
     translate_to_commands,
     translate_makeannotations,
 )
@@ -15,30 +18,18 @@ class TestTranslateCommands(unittest.TestCase):
 
     def test_make_statement(self):
         self.assertEqual(
-            ["cd /tmp" + MAKEANNOTATIONHINT],
+            [Command("cd /tmp", "/tmp", [MAKEANNOTATIONHINT])],
             translate_to_commands("make: Entering directory '/tmp'"))
 
     def test_nonsense(self):
         self.assertEqual([], translate_to_commands("Hello world"))
 
-    def test_simple_command(self):
-        self.assertEqual(
-            ["cc -c -o main.o main.c"],
-            translate_to_commands("+ cc -c -o main.o main.c")
-        )
-
-    def test_nested_command(self):
-        self.assertEqual(
-            ["cc -c -o main.o main.c"],
-            translate_to_commands("++++ cc -c -o main.o main.c")
-        )
-
     def test_small_block(self):
         self.assertEqual([
-            "cd /tmp" + MAKEANNOTATIONHINT,
-            "cc -c -o main.o main.c",
-            "cc -c -o divisible.o divisible.c",
-            "cc -o divisible main.o divisible.o"],
+            Command("cd /tmp", "/tmp", [MAKEANNOTATIONHINT]),
+            Command("cc -c -o main.o main.c", "/tmp"),
+            Command("cc -c -o divisible.o divisible.c", "/tmp"),
+            Command("cc -o divisible main.o divisible.o", "/tmp")],
             # "cd " + os.getcwd() + MAKEANNOTATIONHINT],
             translate_to_commands(dedent("""\
             make: Entering directory '/tmp'
@@ -69,6 +60,9 @@ class TestExtractDebugshell(unittest.TestCase):
 
     def test_ignore_normal(self):
         self.assertEqual(["cd dir"], extract_debugshell(["cd dir"]))
+
+    def test_nested_command(self):
+        self.assertEqual(["cmd"], extract_debugshell(["++++ cmd"]))
 
 
 class TestRelevantLines(unittest.TestCase):
@@ -101,11 +95,11 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
             └── Makefile
         """
         self.assertEqual([
-            "cd /main" + MAKEANNOTATIONHINT,
+            "cd /main" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in main",
-            "cd /main/sub" + MAKEANNOTATIONHINT,
+            "cd /main/sub" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in sub",
-            "cd /main" + MAKEANNOTATIONHINT,
+            "cd /main" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in main"],
             # "cd " + os.getcwd() + MAKEANNOTATIONHINT],
             translate_makeannotations([
@@ -132,19 +126,19 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
         """
 
         self.assertEqual([
-            "cd /main" + MAKEANNOTATIONHINT,
+            "cd /main" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in main",
-            "cd /main/dir1" + MAKEANNOTATIONHINT,
+            "cd /main/dir1" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in dir1",
-            "cd /main/dir1/subdir" + MAKEANNOTATIONHINT,
+            "cd /main/dir1/subdir" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in subdir",
-            "cd /main/dir1" + MAKEANNOTATIONHINT,
+            "cd /main/dir1" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in dir1",
-            "cd /main" + MAKEANNOTATIONHINT,
+            "cd /main" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in main",
-            "cd /main/dir2" + MAKEANNOTATIONHINT,
+            "cd /main/dir2" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in dir2",
-            "cd /main" + MAKEANNOTATIONHINT,
+            "cd /main" + " # " + MAKEANNOTATIONHINT,
             "+ cmd in main"],
             # "cd " + os.getcwd() + MAKEANNOTATIONHINT,]
             translate_makeannotations([
@@ -177,23 +171,76 @@ class TestTranslateMakeAnnotations(unittest.TestCase):
         )
 
 
-class TestIsNoop(unittest.TestCase):
+class TestEncapsulateCommands(unittest.TestCase):
 
-    def test_empty(self):
-        self.assertTrue(is_noop(""))
+    def test_string_representation(self):
+        self.assertTrue(
+            str(Command("cmd that does something", "/somedir")).startswith(
+                "cmd that does something")
+        )
 
-    def test_spaces(self):
-        self.assertTrue(is_noop("   "))
+    def test_remember_makecd(self):
+        cmds = [
+            "cd /somedir" + " # " + MAKEANNOTATIONHINT,
+            "cmd in somedir",
+        ]
 
-    def test_command(self):
-        self.assertFalse(is_noop("cd dir"))
-        self.assertFalse(is_noop("cc -c main.c"))
+        probe = encapsulate_commands(cmds)[1]
 
-    def test_comment(self):
-        self.assertTrue(is_noop("# comment"))
+        self.assertEqual("cmd in somedir", probe.bashcmd)
+        self.assertEqual("/somedir", probe.curdir)
 
-    def test_comment_with_leading_space(self):
-        self.assertTrue(is_noop(" # comment"))
+    def test_remember_multi_makecd(self):
+        cmds = [
+            "cd /somedir" + " # " + MAKEANNOTATIONHINT,
+            "cmd in somedir",
+            "cd /otherdir" + " # " + MAKEANNOTATIONHINT,
+            "cmd in otherdir",
+        ]
 
-    def test_command_with_comment(self):
-        self.assertFalse(is_noop("cd dir # change directory"))
+        probe = encapsulate_commands(cmds)
+
+        self.assertEqual("cd /otherdir", probe[2].bashcmd)
+        self.assertEqual("/somedir", probe[2].curdir)
+        self.assertEqual("cmd in otherdir", probe[3].bashcmd)
+        self.assertEqual("/otherdir", probe[3].curdir)
+
+    def test_ingore_normal_cd(self):
+        cmds = [
+            "cd /somedir" + " # " + MAKEANNOTATIONHINT,
+            "cd /otherdir",
+            "cmd in somedir",
+        ]
+
+        probe = encapsulate_commands(cmds)[2]
+
+        self.assertEqual("cmd in somedir", probe.bashcmd)
+        self.assertEqual("/somedir", probe.curdir)
+
+
+class TestIsMakeCdCmd(unittest.TestCase):
+
+    def test_make_cd(self):
+        self.assertTrue(is_make_cd_cmd("cd dir" + " # " + MAKEANNOTATIONHINT))
+
+    def test_normal_cd(self):
+        self.assertFalse(is_make_cd_cmd("cd dir"))
+
+
+class TestExtractDirFromMakecd(unittest.TestCase):
+
+    def test_simple_dir(self):
+        self.assertEqual(
+            "dir",
+            extract_dir_from_makecd("cd dir" + " # " + MAKEANNOTATIONHINT))
+
+    def test_root_dir(self):
+        self.assertEqual(
+            "/dir",
+            extract_dir_from_makecd("cd /dir" + " # " + MAKEANNOTATIONHINT))
+
+    def test_sub_dirs(self):
+        self.assertEqual(
+            "dir/subdir/",
+            extract_dir_from_makecd(
+                "cd dir/subdir/" + " # " + MAKEANNOTATIONHINT))

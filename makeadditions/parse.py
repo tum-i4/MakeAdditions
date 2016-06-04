@@ -5,6 +5,7 @@ Helpful functions for string and command parsing
 import os
 import re
 from .constants import MAKEANNOTATIONHINT
+from .Command import Command
 
 
 class MakefileDirstack():
@@ -20,7 +21,7 @@ class MakefileDirstack():
     @staticmethod
     def cd_command_to(directory):
         """ Generate a cd command to the given directory """
-        return "cd " + directory + MAKEANNOTATIONHINT
+        return "cd " + directory + " # " + MAKEANNOTATIONHINT
 
     def push_dir(self, directory):
         """ Pushes a directory to the stack and return the
@@ -64,12 +65,6 @@ class MakefileDirstack():
         return self.dirstack.__str__()
 
 
-def is_noop(cmd):
-    """ Checks, if the given command perform no operation, e.g. pure
-    comment strings or all sorts of empty strings """
-    return not cmd.strip() or cmd.strip().startswith("#")
-
-
 def extract_debugshell(makeoutput):
     """ Extract all command invocations from shell debug statements and
     make them to normal commands """
@@ -87,9 +82,10 @@ def translate_to_commands(makeoutput):
     """ Translate all the output from make, debug-shell and output of commands
     during make, and translate them to executable commands """
 
-    return extract_debugshell(
-        translate_makeannotations(
-            get_relevant_lines(makeoutput)))
+    return encapsulate_commands(
+        extract_debugshell(
+            translate_makeannotations(
+                get_relevant_lines(makeoutput))))
 
 
 def check_debugshell_and_makefile(makeoutput):
@@ -128,3 +124,53 @@ def translate_makeannotations(makeoutput):
         else dirstack.translate_if_dirannotation(cmd)
         for cmd in makeoutput
     ]
+
+
+def encapsulate_commands(cmdlist):
+    """ Encapsulate a list of command strings inside the command class.
+    All necessary information is extracted meanwhile. """
+
+    # Empty lists results in empty lists
+    if not cmdlist:
+        return []
+
+    # Make outputs must start with directory information
+    assert is_make_cd_cmd(cmdlist[0])
+
+    # initialize the current dir
+    curdir = extract_dir_from_makecd(cmdlist[0])
+
+    result = []
+    for cmdstr in cmdlist:
+
+        # separate command from comment
+        if "#" in cmdstr:
+            cmd, comment = cmdstr.split("#")
+        else:
+            cmd, comment = cmdstr, None
+
+        # Create the new command object
+        cmdobj = Command(cmd.strip(), curdir)
+
+        # add comment as an annotation
+        if comment is not None:
+            cmdobj.add_annotation(comment.strip())
+
+        result.append(cmdobj)
+
+        # store the cd for the next command, if necessary
+        if is_make_cd_cmd(cmdstr):
+            curdir = extract_dir_from_makecd(cmdstr)
+
+    return result
+
+
+def extract_dir_from_makecd(cmd):
+    """ Extract the directory from a translated cd of makeoutput """
+    assert is_make_cd_cmd(cmd)
+    return cmd[3:-len(" # " + MAKEANNOTATIONHINT)]
+
+
+def is_make_cd_cmd(cmd):
+    """ Checks, if the given command is a translated make directory change """
+    return cmd.startswith("cd ") and cmd.endswith(" # " + MAKEANNOTATIONHINT)

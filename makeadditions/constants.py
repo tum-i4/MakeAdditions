@@ -17,7 +17,7 @@ DEPENDENCYFLAGS = ["-MD", "-MMD", "-MP", "-M", "-MM"]
 DEPENDENCYEMISSION = ["-MT", "-MF", "-MQ"]
 
 # Add this comment commands from make annotations
-MAKEANNOTATIONHINT = " # from make"
+MAKEANNOTATIONHINT = "from make"
 
 # Additional file extension for executable files
 # This may not be empty. ".bc" will be appended automatically

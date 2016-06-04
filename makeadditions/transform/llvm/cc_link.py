@@ -15,13 +15,13 @@ class TransformCCLink(TransformerLlvm):
     @staticmethod
     def can_be_applied_on(cmd):
         return (
-            any(cmd.startswith(s + " ") for s in COMPILERS) and
-            " -c " not in cmd)
+            any(cmd.bashcmd.startswith(s + " ") for s in COMPILERS) and
+            " -c " not in cmd.bashcmd)
 
     @staticmethod
     def apply_transformation_on(cmd, container):
         # tokenize and remove the original command
-        tokens = cmd.split()[1:]
+        tokens = cmd.bashcmd.split()[1:]
 
         # remove optimizer flags
         tokens = [t for t in tokens if t not in OPTIMIZERFLAGS]
@@ -34,23 +34,16 @@ class TransformCCLink(TransformerLlvm):
                 tokens[pos + 1] += EXECFILEEXTENSION
             tokens[pos + 1] += ".bc"
 
-        # If we compile against a previos compiled library
-        if "-L." in tokens:
-            # The local library path is no longer needed
-            tokens.remove("-L.")
-
         # replace -l flags, if the library was llvm-compiled earlier
         tokens = [
-            "lib" + t[2:] + ".a.bc"
-            if (t.startswith("-l") and
-                "lib" + t[2:] + ".a.bc" in container.libs) else t
+            container.libs.get("lib" + t[2:], t)
+            if t.startswith("-l") else t
             for t in tokens]
 
         # replace references to static libraries
         tokens = [
-            t + ".bc"
-            if (t.endswith(".a") and
-                path.basename(t) + ".bc" in container.libs) else t
+            container.libs.get(path.basename(t[:-2]), t)
+            if t.endswith(".a") else t
             for t in tokens]
 
         # transform all linked .o-files to the corresponding .bc-file
@@ -61,4 +54,5 @@ class TransformCCLink(TransformerLlvm):
         tokens = [t for t in tokens if not (
             any(t.startswith(start) for start in flagstarts)) or t == "-o"]
 
-        return LLVMLINK + " " + " ".join(no_duplicates(tokens))
+        cmd.bashcmd = LLVMLINK + " " + " ".join(no_duplicates(tokens))
+        return cmd

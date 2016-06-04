@@ -36,7 +36,8 @@ class MakeLlvm(MakeScript):
         if not applicable:
             # if no transformation is applicable, skip this command
             self.skipped += 1
-            return ""
+            cmd.bashcmd = ""
+            return cmd
         elif len(applicable) == 1:
             # if exact one transformation is applicable, apply it
             return applicable[0].apply_transformation_on(cmd, self)

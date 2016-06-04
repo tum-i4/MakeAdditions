@@ -1,4 +1,5 @@
 import unittest
+from makeadditions.Command import Command
 from makeadditions.MakeLlvm import MakeLlvm
 
 
@@ -8,9 +9,11 @@ class TestTransformLlvm(unittest.TestCase):
         self.llvm = MakeLlvm()
 
     def test_empty(self):
-        self.assertEqual("", self.llvm.transform(""))
+        self.assertEqual(
+            Command("", "/tmp"), self.llvm.transform(Command("", "/tmp")))
 
     def test_failcount(self):
         self.assertEqual(0, self.llvm.skipped)
-        self.llvm.transform("just impossible to translate wtf")
+        self.llvm.transform(
+            Command("just impossible to translate wtf", "/tmp"))
         self.assertEqual(1, self.llvm.skipped)

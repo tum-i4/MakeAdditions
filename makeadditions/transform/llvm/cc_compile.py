@@ -17,13 +17,13 @@ class TransformCCCompile(TransformerLlvm):
 
     @staticmethod
     def can_be_applied_on(cmd):
-        return (
-            any(cmd.startswith(s + " ") for s in COMPILERS) and " -c " in cmd)
+        return (any(cmd.bashcmd.startswith(s + " ") for s in COMPILERS) and
+                " -c " in cmd.bashcmd)
 
     @staticmethod
     def apply_transformation_on(cmd, container):
         # tokenize and remove the original command
-        tokens = cmd.split()[1:]
+        tokens = cmd.bashcmd.split()[1:]
 
         # remove optimizer flags
         tokens = [t for t in tokens if t not in OPTIMIZERFLAGS]
@@ -53,4 +53,5 @@ class TransformCCCompile(TransformerLlvm):
             if tokens[pos + 1].endswith(".o"):
                 tokens[pos + 1] = tokens[pos + 1][:-2] + ".bc"
 
-        return newcmd + " ".join(tokens)
+        cmd.bashcmd = newcmd + " ".join(tokens)
+        return cmd

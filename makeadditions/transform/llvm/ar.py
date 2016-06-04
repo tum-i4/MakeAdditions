@@ -12,13 +12,13 @@ class TransformAr(TransformerLlvm):
 
     @staticmethod
     def can_be_applied_on(cmd):
-        return (cmd.startswith("ar ") and
-                re.search(r"ar [cruq]+ [^ ]+\.a", cmd))
+        return (cmd.bashcmd.startswith("ar ") and
+                re.search(r"ar [cruq]+ [^ ]+\.a", cmd.bashcmd))
 
     @staticmethod
     def apply_transformation_on(cmd, container):
         # tokenize and remove the original command with first option
-        tokens = cmd.split()[1:]
+        tokens = cmd.bashcmd.split()[1:]
 
         # llvm needs a flag for specifying the output file
         tokens[0] = "-o"
@@ -29,4 +29,5 @@ class TransformAr(TransformerLlvm):
         # transform all linked .o-files to the corresponding .bc-file
         tokens = [t[:-2] + ".bc" if t.endswith(".o") else t for t in tokens]
 
-        return LLVMLINK + " " + " ".join(tokens)
+        cmd.bashcmd = LLVMLINK + " " + " ".join(tokens)
+        return cmd
