@@ -21,7 +21,7 @@ test: venv
 
 # Initialize the virtual environment, if needed
 .venv:
-	pyvenv .venv
+	python3 -m venv .venv
 	.venv/bin/pip install --upgrade pip
 
 # Install and keep in sync with the requirements
