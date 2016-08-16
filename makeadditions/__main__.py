@@ -56,9 +56,14 @@ def main():
              "of errors",
         action="store_true",
     )
+    parser.add_argument(
+        '--directory',
+        help="Make switches to this directory before anything is executed",
+        default=getcwd()
+    )
 
     args = parser.parse_args()
-    makefile = path.join(getcwd(), "Makefile")
+    makefile = path.join(path.abspath(args.directory), "Makefile")
 
     # Check correct configuration
     check_config()

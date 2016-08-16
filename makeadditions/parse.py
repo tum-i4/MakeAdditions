@@ -97,7 +97,8 @@ def check_debugshell_and_makefile(makeoutput):
     # makeoutput must start with directory information.
     # Reason: The --print-directory flag for make flag was given
     if (not makeoutput or
-            not makeoutput.startswith("make: Entering directory ")):
+            not (makeoutput.startswith("make: Entering directory ") or
+                 makeoutput.startswith("make[1]: Entering directory "))):
         raise Exception(
             "Directory changes cannot be recognized: " + makeoutput[0:35])
 

@@ -42,11 +42,14 @@ def makefile_execution(func):
 
 
 @makefile_execution
-def run_make_with_debug_shell(_, targets):
+def run_make_with_debug_shell(makefile, targets):
     """ Run make and add all executed shell commands to the output """
 
+    makedir = dirname(makefile)
+
     output = check_output(
-        'make --print-directory --quiet SHELL="sh -x" ' + " ".join(targets),
+        ('make --directory=%s --print-directory '
+         '--quiet SHELL="sh -x" ' % makedir) + " ".join(targets),
         env=english_environment(), shell=True, stderr=STDOUT)
 
     # finally return the decoded output of make
@@ -54,10 +57,13 @@ def run_make_with_debug_shell(_, targets):
 
 
 @makefile_execution
-def has_make_something_todo(_, targets):
+def has_make_something_todo(makefile, targets):
     """ Check, if the make command actually does something """
+    makedir = dirname(makefile)
+
     return call(
-        ["make", "--question"] + targets, stderr=DEVNULL, stdout=DEVNULL) != 0
+        ["make", "--directory=%s" % makedir, "--question"] + targets,
+        stderr=DEVNULL, stdout=DEVNULL) != 0
 
 
 def english_environment():
