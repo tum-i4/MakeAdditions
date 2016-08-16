@@ -145,7 +145,7 @@ def encapsulate_commands(cmdlist):
     for cmdstr in cmdlist:
 
         # separate command from comment
-        if "#" in cmdstr:
+        if "#" in cmdstr and cmdstr.count("#") == 1:
             cmd, comment = cmdstr.split("#")
         else:
             cmd, comment = cmdstr, None
