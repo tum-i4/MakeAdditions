@@ -3,6 +3,7 @@ This container contains a command, that can be executed in a shell, with
 some additional informations.
 """
 
+import re
 import subprocess
 
 
@@ -46,6 +47,9 @@ class Command:
 
     def execute(self):
         """ Execute this program in a shell """
+
+        if re.search(r"\"\S+\"", self.bashcmd):
+            self.bashcmd = self.bashcmd.replace('"', '\\"')
 
         # I know, this shell=True can be evil, but what can we do?
         return subprocess.call(self.bashcmd, shell=True, cwd=self.curdir)
