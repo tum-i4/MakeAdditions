@@ -43,3 +43,12 @@ class TestTransformLlvmCCCompile(TransformationTestCase):
             ".deps/libmain.Tpo -c libmain.c -fPIC -DPIC " +
             "-o .libs/libmain.o"
         )
+
+    """
+    # TODO think about, what transformation is suitable
+    def test_cc_compile_and_link_simultaneously_zopfli(self):
+        self.assertTransformation(
+            CLANG + " TODO ",
+            "gcc blocksplitter.c cache.c -o zopfli"
+        )
+    """
