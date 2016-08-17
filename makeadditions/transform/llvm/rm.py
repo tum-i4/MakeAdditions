@@ -12,7 +12,8 @@ class TransformAr(TransformerLlvm):
 
     @staticmethod
     def can_be_applied_on(cmd):
-        return cmd.bashcmd.startswith("rm -f ")
+        return (cmd.bashcmd.startswith("rm -f ") and
+                not cmd.bashcmd.startswith("rm -f -r"))
 
     @staticmethod
     def apply_transformation_on(cmd, container):

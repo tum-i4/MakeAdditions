@@ -33,3 +33,6 @@ class TestTransformLlvmRm(TransformationTestCase):
             ".bc bzip2recover" + EXECFILEEXTENSION + ".bc",
             "rm -f '*.o' libbz2.a bzip2 bzip2recover sample1.rb2"
         )
+
+    def test_rm_recursive_tar(self):
+        self.assertTransformation("", "rm -f -r testsuite.dir testsuite.log")
