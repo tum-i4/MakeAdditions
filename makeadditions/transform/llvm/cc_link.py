@@ -16,7 +16,7 @@ class TransformCCLink(TransformerLlvm):
     def can_be_applied_on(cmd):
         return (
             any(cmd.bashcmd.startswith(s + " ") for s in COMPILERS) and
-            " -c " not in cmd.bashcmd)
+            " -c " not in cmd.bashcmd and "-o /dev/null" not in cmd.bashcmd)
 
     @staticmethod
     def apply_transformation_on(cmd, container):

@@ -95,3 +95,9 @@ class TestTransformLlvmCCLink(TransformationTestCase):
             "-lngportab -lngtool -lngipaddr -lz",
             "/tmp"
         )
+
+    def test_cc_devnull_busybox(self):
+        self.assertTransformation(
+            "",
+            "gcc -O2 -S -o /dev/null -xc /dev/null"
+        )
