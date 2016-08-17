@@ -8,18 +8,20 @@ from ...constants import (
     COMPILERS,
     DEPENDENCYFLAGS,
     DEPENDENCYEMISSION,
+    EXECFILEEXTENSION,
     OPTIMIZERFLAGS
 )
 
 
-class TransformCCCompile(TransformerLlvm):
-    """ transform compile commands """
+class TransformCCBoth(TransformerLlvm):
+    """ transform commands, that compile and link at the same time"""
 
     @staticmethod
     def can_be_applied_on(cmd):
         return (any(cmd.bashcmd.startswith(s + " ") for s in COMPILERS) and
                 "-o /dev/null" not in cmd.bashcmd and
-                " -c " in cmd.bashcmd)
+                " -c " not in cmd.bashcmd and (
+                    ".c " in cmd.bashcmd or cmd.bashcmd.endswith(".c")))
 
     @staticmethod
     def apply_transformation_on(cmd, container):
@@ -42,17 +44,17 @@ class TransformCCCompile(TransformerLlvm):
         tokens = [t for t in tokens if t not in DEPENDENCYFLAGS]
 
         # build the new command
-        newcmd = CLANG + " -emit-llvm "
+        newcmd = CLANG + " -c -emit-llvm "
 
         # add -g flag, if it was not there before
         if "-g" not in tokens:
             newcmd += "-g "
 
-        # rename the output-file from .o to .bc, if specified
         if "-o" in tokens:
+            # append .x.bc to the output file
             pos = tokens.index("-o")
-            if tokens[pos + 1].endswith(".o"):
-                tokens[pos + 1] = tokens[pos + 1][:-2] + ".bc"
+            tokens[pos + 1] += EXECFILEEXTENSION + ".bc"
 
         cmd.bashcmd = newcmd + " ".join(tokens)
+
         return cmd
