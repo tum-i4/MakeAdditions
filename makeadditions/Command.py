@@ -48,8 +48,8 @@ class Command:
     def execute(self):
         """ Execute this program in a shell """
 
-        if re.search(r"\"\S+\"", self.bashcmd):
-            self.bashcmd = self.bashcmd.replace('"', '\\"')
+        # Escape quotes, that would be removed by shell elsewise
+        self.bashcmd = re.sub(r"(\"\S+)\"", r"\\\1\"", self.bashcmd)
 
         # I know, this shell=True can be evil, but what can we do?
         return subprocess.call(self.bashcmd, shell=True, cwd=self.curdir)
