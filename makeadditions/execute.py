@@ -49,7 +49,7 @@ def run_make_with_debug_shell(makefile, targets):
 
     output = check_output(
         ('make --directory=%s --print-directory '
-         '--quiet SHELL="sh -x" ' % makedir) + " ".join(targets),
+         '--quiet SHELL="bash -x" ' % makedir) + " ".join(targets),
         env=english_environment(), shell=True, stderr=STDOUT)
 
     # finally return the decoded output of make

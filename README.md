@@ -52,10 +52,10 @@ First of all, make only rebuilds targets, that are "new" or "changed" since the 
 
 ### Step 2: Perform normal, but quiet make with shell capture
 ```
-make --print-directory --quiet SHELL="sh -x" <target>
+make --print-directory --quiet SHELL="bash -x" <target>
 ```
 
-The next step is a "normal" call of make for the given target - it just uses some weired flags for the call. The most important one is `SHELL="sh -x"`. It basically prints all commands with inserted variables before they are executed. This produces a lot of output, but each command, that is invoked during make, even if it is hidden in another .sh-file, is printed with a "+" in the head of the line. (run `help set` for more details)
+The next step is a "normal" call of make for the given target - it just uses some weired flags for the call. The most important one is `SHELL="bash -x"`. It basically prints all commands with inserted variables before they are executed. This produces a lot of output, but each command, that is invoked during make, even if it is hidden in another .sh-file, is printed with a "+" in the head of the line. (run `help set` for more details)
 
 There is only one downside: You get no information, in which directory you are working. Therefore, the `--print-directory` flag is given, which tells make to add additional information to the output, whenever it is entering or leaving a directory.
 
