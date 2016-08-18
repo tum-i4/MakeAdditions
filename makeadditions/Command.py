@@ -5,6 +5,7 @@ some additional informations.
 
 import re
 import subprocess
+from .config import LLVMOPT, OPTDELETE
 
 
 class Command:
@@ -51,8 +52,34 @@ class Command:
         # Escape quotes, that would be removed by shell elsewise
         self.bashcmd = re.sub(r"(\"\S+)\"", r"\\\1\"", self.bashcmd)
 
-        # I know, this shell=True can be evil, but what can we do?
-        return subprocess.call(self.bashcmd, shell=True, cwd=self.curdir)
+        retry = True
+        while retry:
+            retry = False
+            try:
+                # I know, this shell=True can be evil, but what can we do?
+                subprocess.check_output(
+                    self.bashcmd, shell=True,
+                    stderr=subprocess.STDOUT, cwd=self.curdir)
+            except subprocess.CalledProcessError as exc:
+                # Try to solve link error with multiple definitions
+                linkerr = re.search("llvm-link: link error in '([^']*)': "
+                                    "Linking globals named '([^']*)': symbol "
+                                    "multiply defined!",
+                                    exc.output.decode("utf-8"))
+                # Delete the double defined function
+                if linkerr and LLVMOPT and OPTDELETE:
+                    subprocess.call(
+                        [LLVMOPT, "-load", OPTDELETE, "-deletedefinition",
+                         linkerr.group(1), "-deletefunction", linkerr.group(2),
+                         "-o", linkerr.group(1) + "-"], cwd=self.curdir)
+                    self.bashcmd = self.bashcmd.replace(
+                        linkerr.group(1), linkerr.group(1) + "-")
+                    retry = True
+                else:
+                    print(exc.output.decode("utf-8"))
+                    return exc.returncode
+
+        return 0
 
     def is_cd(self):
         """ Checks, if this command is only a cd command """

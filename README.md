@@ -81,21 +81,6 @@ You may notice, that the output of this command contains a lot of empty lines. T
 
 Finally, all the transformed commands are executed in the same order as the original commands. Unfortunately, this execution only works on a single thread, because no information about independent commands remains in their serial record.
 
-## Known errors and problems
-
-### `llvm-link` has no `-Wl,--as-needed`
-
-This problem occurs, if the source file redefines a function, that is also defined in library, and both are linked together later. The error message says:
-
-```
-llvm-link: link error in '*.bc': Linking globals named '...': symbol multiply defined!
-```
-
-gcc can use the `--as-needed` flag in this case, which denotes, that only missing functions are linked from the library. Redefined functions are not needed and thereby not imported or multiply defined.
-
-llvm-link is missing this feature. The only known workaround is to use `make+llvm --keep-going` and later exclude the unneeded implementation by hand.
-
-
 ## Notes for developers
 
 This project uses a makefile for the most common tasks. Simply run `make` in the main directory in order to get a list of all commands. If you want to submit pull requests, please make sure, that `make test` still works and `pylint makeadditions` reports no errors.
