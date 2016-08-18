@@ -11,6 +11,8 @@ CONFIG.read(path.join(path.dirname(__file__), "..", "config.ini"))
 
 CLANG = CONFIG.get("toolchain", "clang", fallback="clang")
 LLVMLINK = CONFIG.get("toolchain", "llvmlink", fallback="llvm-link")
+LLVMOPT = CONFIG.get("toolchain", "llvmopt", fallback="opt")
+OPTDELETE = CONFIG.get("toolchain", "optdelete", fallback="")
 
 
 def check_config():
