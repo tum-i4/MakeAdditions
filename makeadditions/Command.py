@@ -49,9 +49,6 @@ class Command:
     def execute(self):
         """ Execute this program in a shell """
 
-        # Escape quotes, that would be removed by shell elsewise
-        self.bashcmd = re.sub(r"(\"\S+)\"", r"\\\1\"", self.bashcmd)
-
         retry = True
         while retry:
             retry = False
