@@ -67,7 +67,8 @@ class TransformCCBoth(TransformerLlvm):
                 if "-g" not in tokens:
                     newpart += "-g "
 
-                newcmd += newpart + " ".join(newtokens) + " " + cfile + "; "
+                newcmd += (newpart + " ".join(newtokens) + " " + cfile +
+                           " -o " + cfile[:-1] + "bc" + "; ")
 
             # And build the link command
             if "-o" in tokens:

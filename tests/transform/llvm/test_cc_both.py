@@ -12,22 +12,24 @@ class TestTransformLlvmCCBoth(TransformationTestCase):
 
     def test_cc_compile_and_link_simultaneously_zopfli(self):
         self.assertTransformation(
-            CLANG + " -c -emit-llvm -g -O0 blocksplitter.c; " +
-            CLANG + " -c -emit-llvm -g -O0 cache.c; " +
-            LLVMLINK + " blocksplitter.bc cache.bc -o zopfli.x.bc",
-            "gcc blocksplitter.c cache.c -o zopfli"
+            CLANG + " -c -emit-llvm -g -O0 src/blocksplitter.c -o "
+            "src/blocksplitter.bc; " +
+            CLANG + " -c -emit-llvm -g -O0 src/cache.c -o "
+            "src/cache.bc; " +
+            LLVMLINK + " src/blocksplitter.bc src/cache.bc -o zopfli.x.bc",
+            "gcc src/blocksplitter.c src/cache.c -o zopfli"
         )
 
     def test_cc_both_multifiles_lz4(self):
         self.assertTransformation(
             CLANG + " -c -emit-llvm -g -O0 -I. -std=c99 -Wall "
-            "-DXXH_NAMESPACE=LZ4_ lz4.c; " +
+            "-DXXH_NAMESPACE=LZ4_ lz4.c -o lz4.bc; " +
             CLANG + " -c -emit-llvm -g -O0 -I. -std=c99 -Wall "
-            "-DXXH_NAMESPACE=LZ4_ lz4hc.c; " +
+            "-DXXH_NAMESPACE=LZ4_ lz4hc.c -o lz4hc.bc; " +
             CLANG + " -c -emit-llvm -g -O0 -I. -std=c99 -Wall "
-            "-DXXH_NAMESPACE=LZ4_ lz4frame.c; " +
+            "-DXXH_NAMESPACE=LZ4_ lz4frame.c -o lz4frame.bc; " +
             CLANG + " -c -emit-llvm -g -O0 -I. -std=c99 -Wall "
-            "-DXXH_NAMESPACE=LZ4_ xxhash.c; " +
+            "-DXXH_NAMESPACE=LZ4_ xxhash.c -o xxhash.bc; " +
             LLVMLINK + " lz4.bc lz4hc.bc lz4frame.bc xxhash.bc "
             "-o liblz4.so.1.7.1.bc",
             "cc -O3 -I. -std=c99 -Wall -DXXH_NAMESPACE=LZ4_ "
