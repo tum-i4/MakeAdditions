@@ -9,10 +9,11 @@ from .execute import check_clang, check_llvmlink
 CONFIG = configparser.ConfigParser()
 CONFIG.read(path.join(path.dirname(__file__), "..", "config.ini"))
 
-CLANG = CONFIG.get("toolchain", "clang", fallback="clang")
-LLVMLINK = CONFIG.get("toolchain", "llvmlink", fallback="llvm-link")
-LLVMOPT = CONFIG.get("toolchain", "llvmopt", fallback="opt")
-OPTDELETE = CONFIG.get("toolchain", "optdelete", fallback="")
+CLANG = path.expanduser(CONFIG.get("toolchain", "clang", fallback="clang"))
+LLVMLINK = path.expanduser(
+    CONFIG.get("toolchain", "llvmlink", fallback="llvm-link"))
+LLVMOPT = path.expanduser(CONFIG.get("toolchain", "llvmopt", fallback="opt"))
+OPTDELETE = path.expanduser(CONFIG.get("toolchain", "optdelete", fallback=""))
 
 
 def check_config():
