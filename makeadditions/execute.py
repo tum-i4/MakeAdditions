@@ -77,6 +77,18 @@ def english_environment():
     return english
 
 
+def get_command_output(cmd):
+    """ Execute a command and returns its output"""
+    try:
+        output = check_output(cmd, env=english_environment(), stderr=STDOUT)
+    except FileNotFoundError:
+        output = b"ERROR: command not found"
+    except CalledProcessError as ex:
+        # Some programms return version string and non zero return codes
+        output = ex.output
+    return output
+
+
 def check_makefile(makefile):
     """ Several check, if the given makefile is valid makefile and exists """
     if not isfile(makefile):
@@ -85,14 +97,41 @@ def check_makefile(makefile):
         raise FileNotFoundError("No Makefile given")
 
 
+def check_llvm_config(llvmconfig):
+    check_version_string(
+        llvmconfig,
+        "usage: llvm-config <OPTION>... ",
+        "llvm-config is not working. Please check your build and parameters!"
+    )
+
 def check_clang(clang):
     """ Check if clang is a valid call to a working clang instance """
 
     check_version_string(
         clang,
         "OVERVIEW: clang LLVM compiler",
-        "clang is not working. Please check your config.ini"
+        "clang is not working. Please check your build and parameters!"
     )
+
+def check_opt(opt):
+    """ Check if opt is a valid call to a working opt instance """
+    check_version_string(
+        opt,
+        "OVERVIEW: llvm .bc -> .bc modular optimizer and analysis printer",
+        "opt is not working. Please check your build and paramters!"
+    )
+
+
+def check_opt_delete(opt, opt_delete_so):
+    """
+    Check if the shared library actually defines the required delete pass
+    """
+    if not opt_delete_so:
+        return
+
+    output = get_command_output([opt, "--load", opt_delete_so, "--help"])
+    if not b"-deletefunction" in output:
+        raise Exception(error)
 
 
 def check_llvmlink(llvmlink):
@@ -111,14 +150,16 @@ def check_version_string(cmd, outputhead, error):
     If not, an exception with with error message is raised
     """
 
-    try:
-        output = check_output([cmd, "--help"], env=english_environment())
-    except FileNotFoundError:
-        output = b"command not found"
-    except CalledProcessError as ex:
-        # Some programms return version string and non zero return codes
-        output = ex.output
+    output = get_command_output([cmd, "--help"])
 
     # Check the head of the version output
     if not output.startswith(bytes(outputhead, "utf-8")):
         raise Exception(error)
+
+
+def read_binary_directory(llvmconfig):
+    """
+    Reads the binary directory from the llvm-config comannd output
+    """
+    output = check_output([llvmconfig, "--bindir"])
+    return output.strip().decode("utf-8")
