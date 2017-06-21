@@ -26,3 +26,8 @@ var/
 
 # IDE project files
 .idea/
+
+# binary files
+*.bc
+*.o
+*.a

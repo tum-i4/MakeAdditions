@@ -13,7 +13,7 @@ class TransformAr(TransformerLlvm):
     @staticmethod
     def can_be_applied_on(cmd):
         return (cmd.bashcmd.startswith("ar ") and
-                re.search(r"ar [-]?[cruq]+ [^ ]+\.a", cmd.bashcmd))
+                re.search(r"ar [-]?[cruqs]+ [^ ]+\.a", cmd.bashcmd))
 
     @staticmethod
     def apply_transformation_on(cmd, container):

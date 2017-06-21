@@ -34,7 +34,7 @@ class MakeScript:
         # look for generated libraries
         if cmd.bashcmd.startswith("ar "):
             libmatch = re.search(
-                r"ar [-]?[cruq]+ ([^ ]*lib([^ ]+)\.a)", cmd.bashcmd)
+                r"ar [-]?[cruqs]+ ([^ ]*lib([^ ]+)\.a)", cmd.bashcmd)
             if libmatch:
                 self.libs["lib" + libmatch.group(2)] = (
                     path.join(cmd.curdir, libmatch.group(1) + ".bc"))

@@ -101,3 +101,19 @@ make+llvm -h
 * **Step 3**: Change the corresponding `makeadditions/transform/ADDITION/COMMAND.py` till all tests pass
 
 If you want to transform a new kind command, just create new files in the corresponding directories. The transformation is registered automatically, as long as the new transformer class inherit from the `TransformerLlvm` class. Thereby you normally don't have to change any other file than the two mentioned above. The `cd` transformer is a good point to start.
+
+### Some kind of integration test
+
+If you want to test your configuration, there are a few small example projects, that can be compiled to test your setup.
+
+```
+make+llvm --directory=tests/projects/hello clean all
+lli tests/projects/hello/hello.x.bc
+# Should give: "Hello World!"
+```
+
+```
+make+llvm --directory=tests/projects/multiple clean all
+lli tests/projects/hello/multiple.x.bc
+# Should give: "Hello Main!"
+```
