@@ -5,6 +5,7 @@ some additional informations.
 
 import re
 import subprocess
+from os import path
 from .config import LLVMOPT, OPTDELETE
 
 
@@ -50,8 +51,10 @@ class Command:
         """ Execute this program in a shell """
 
         retry = True
+        offset = 0
         while retry:
             retry = False
+            offset += 1
             try:
                 # I know, this shell=True can be evil, but what can we do?
                 subprocess.check_output(
@@ -59,18 +62,29 @@ class Command:
                     stderr=subprocess.STDOUT, cwd=self.curdir)
             except subprocess.CalledProcessError as exc:
                 # Try to solve link error with multiple definitions
-                linkerr = re.search("llvm-link: link error in '([^']*)': "
-                                    "Linking globals named '([^']*)': symbol "
-                                    "multiply defined!",
-                                    exc.output.decode("utf-8"))
+                linkerr = re.search(
+                    "Linking globals named '([^']*)': symbol multiply defined!",
+                    exc.output.decode("utf-8"))
+                multfunc = linkerr.group(1)
+
+                # This is a nasty hack, feel free to suggest improvements
+                candidates = [c for c in self.bashcmd.split()
+                              if c.endswith(".bc") and not c.endswith(".x.bc")]
+
+                tbcfile = candidates[-offset]
+                splitpoint = len(path.basename(tbcfile))
+                newtbcfile = tbcfile[:-splitpoint] + '_' + tbcfile[-splitpoint:]
+                if offset == len(candidates):
+                    continue
+
                 # Delete the double defined function
                 if linkerr and LLVMOPT and OPTDELETE:
                     subprocess.call(
                         [LLVMOPT, "-load", OPTDELETE, "-deletedefinition",
-                         linkerr.group(1), "-deletefunction", linkerr.group(2),
-                         "-o", linkerr.group(1) + "-"], cwd=self.curdir)
-                    self.bashcmd = self.bashcmd.replace(
-                        linkerr.group(1), linkerr.group(1) + "-")
+                         tbcfile, "-deletefunction", multfunc,
+                         "-o", newtbcfile], cwd=self.curdir)
+                    self.bashcmd = self.bashcmd.replace(tbcfile, newtbcfile)
+
                     retry = True
                 else:
                     print(exc.output.decode("utf-8"))
